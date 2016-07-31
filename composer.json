@@ -1,0 +1,13 @@
+{
+    "name": "innosoft/cms",
+    "description": "The InnoSoft's CMS",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "InnoSoft",
+            "email": "innosoftcantho@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
