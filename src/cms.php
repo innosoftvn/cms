@@ -1,0 +1,10 @@
+<?php
+
+/* 
+ * CMS config
+ */
+
+return [
+    
+];
+
