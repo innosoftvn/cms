@@ -37,6 +37,25 @@ And then, to perform actual copying, user should **publish** our views, with **A
 ```
 php artisan vendor:publish
 ```
+Adding `helpers.php` to main `composer.json` section called **"files"**:
+```
+"autoload": {
+      "classmap": [
+          "database"
+      ],
+      "psr-4": {
+          "App\\": "app/",
+          "InnoSoft\\CMS\\": "vendor/innosoft/cms/src"
+      },
+      "files": [
+  			"helpers.php"
+  		]
+},
+````
+And run this command from main folder:
+```
+composer dump-autoload
+```
 Then add the following lines to the `routes.php`:
 ```
 Route::group(['middleware' => ['web']], function () {
