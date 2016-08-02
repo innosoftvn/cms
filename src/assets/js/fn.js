@@ -1,12 +1,3 @@
-function locationHash() {
-    var hash = document.location.hash;
-    if(hash !== ''){
-        hash = hash.slice(1, hash.length);
-        hash = hash.split("-");
-    }
-    return hash;
-}
-
 function formValidate(id) {
     var validate = $('#'+id).validate({
         highlight: function (element) {
@@ -51,80 +42,57 @@ function tableRefesh(selecttor){
     });
 }
 
-function Grid() {
-    var self = this;
-    self.fcols = [];
-    self.sizes = [10, 20, 50, 100, 200, 500];
-    self.total = ko.observable(0);
-    self.cols = ko.observableArray([]);
-    self.rows = ko.observableArray([]);
-    self.ids = ko.observableArray([]);
-    self.pagenum = ko.observable(1);
-    self.pagesize = ko.observable(10);
-    self.search = ko.observable('');
-    self.sortdatafield = ko.observable('');
-    self.sortorder = ko.observable(0);
-    self.filters = ko.observableArray([]);
-    self.display = ko.observable(false);
-    self.loading = ko.observable(false);
-    self.is_fetch = false;
-    self.pagemax = ko.pureComputed(function () {
-        return Math.max(Math.ceil(self.total() / self.pagesize()), 1);
-    });
-    self.setSize = function (data) {
-        if (self.pagesize() !== data){
-            self.pagenum(1);
-            self.pagesize(data);
-        }
-    };
-    self.start = ko.pureComputed(function () {
-        return self.pagesize() * (self.pagenum() - 1) + 1;
-    });
-    self.end = ko.pureComputed(function () {
-        return Math.min(self.pagesize() * self.pagenum(), self.total());
-    });
-    self.next = function () {
-        self.pagenum(self.pagenum() + 1);
-    };
-    self.prev = function () {
-        self.pagenum(self.pagenum() - 1);
-    };
-    self.del = function () {
-        $('#cfmDel').modal('show');
-    };
-    self.sort = function (column) {
-        if(column !== self.sortdatafield()){
-            self.sortdatafield(column);
-            // self.sortorder(1);
-        }else{
-            var sort = self.sortorder() + 1;
-            if(sort > 1) sort = -1;
-            self.sortorder(sort);
-        }
-    };
-    self.toogleAll = function () {
-        if (self.ids().length === self.rows().length) {
-            self.ids([]);
-        } else {
-            var t = [];
-            ko.utils.arrayForEach(self.rows(), function (item) {
-                t.push(item.id);
+// ko components register
+ko.components.register('form-signin', {
+    viewModel: function(params) {
+        var self = this;
+        self.params = params;
+        self.notify = ko.observable('');
+        
+        self.signin = function(){
+            $('#form-signin .btn').prop("disabled", true);
+            $.post( "login", $('#form-signin').serialize()).done(function( data ){
+                $('#form-signin .btn').prop("disabled", false);
+                if(data.status === 'success'){
+                    window.location.reload();
+                }else{
+                    self.notify('<div class="alert alert-danger" role="alert">'+data.message+'</div>');
+                }
             });
-            self.ids(t);
-        }
-        return true;
-    };
-    self.showLoading = function(){
-        self.loading(true);
-    };
-    self.hideLoading = function(){
-        self.loading(false);
-    };
-    self.doSearch = function(id){
-        self.search($('#'+id).val());
-    };
-    self.clearSearch = function(id){
-        $('#'+id).val('');
-        self.search('');
-    };
-};
+            return false;
+        };
+        $('#form-signin .form-control').on('keyup', function(){
+            self.notify('');
+        });
+    },
+    template: '<div class="container">\
+        <div class="panel panel-default panel-signin">\
+            <div class="panel-body">\
+                <form data-bind="submit: signin" class="form-signin" id="form-signin" method="POST">\
+                    <input type="hidden" name="_token" data-bind="value: params.token">\
+                    <img data-bind="attr:{src: params.logo}" class="img-responsive" style="margin: 5px auto 20px auto;"/>\
+                    <div data-bind="html: notify"></div>\
+                    <input type="text" id="username" name="username" class="form-control" data-bind="attr:{placeholder: params.labels.username}" required autofocus>\
+                    <input type="password" id="password" name="password" class="form-control" data-bind="attr:{placeholder: params.labels.password}" required>\
+                    <div class="checkbox">\
+                        <label>\
+                            <input type="checkbox" name="remember-me" value="true"> <span data-bind="html: params.labels.remember_me"></span>\
+                        </label>\
+                    </div>\
+                    <button data-bind="attr:{class: \'btn btn-lg btn-block btn-\' + params.type}, html: params.labels.login" type="submit"></button>\
+                </form>\
+            </div>\
+        </div>\
+    </div>'
+});
+
+ko.components.register('button', {
+    viewModel: function(params){
+        var self = this;
+        self.type = params.type;
+        self.icon = params.icon;
+        self.label = params.label;
+        self.action = params.action;
+    },
+    template: '<button data-bind="attr: {class: \'btn btn-\'+type}, click: action"><span data-bind="attr:{class: icon}"></span> <span data-bind="attr: {class: label}"></span> </button>'
+});

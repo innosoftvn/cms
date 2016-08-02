@@ -48,8 +48,8 @@ Adding `helpers.php` to main `composer.json` section called **"files"**:
           "InnoSoft\\CMS\\": "vendor/innosoft/cms/src"
       },
       "files": [
-  			"helpers.php"
-  		]
+  		  "helpers.php"
+  	  ]
 },
 ````
 And run this command from main folder:

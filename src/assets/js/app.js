@@ -12,9 +12,6 @@ window.onload = function(){
         verticalupclass: 'glyphicon glyphicon-plus',
         verticaldownclass: 'glyphicon glyphicon-minus'
     });
-
-    // ko apply bindings
-    $.each(koApplyBindings, function(idx, val){
-        ko.applyBindings(val.model, document.getElementById(val.id));
-    });
+    
+    ko.applyBindings();
 };
