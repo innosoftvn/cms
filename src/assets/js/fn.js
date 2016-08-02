@@ -86,13 +86,42 @@ ko.components.register('form-signin', {
     </div>'
 });
 
-ko.components.register('button', {
-    viewModel: function(params){
-        var self = this;
-        self.type = params.type;
-        self.icon = params.icon;
-        self.label = params.label;
-        self.action = params.action;
-    },
-    template: '<button data-bind="attr: {class: \'btn btn-\'+type}, click: action"><span data-bind="attr:{class: icon}"></span> <span data-bind="attr: {class: label}"></span> </button>'
+ko.components.register('button-default', {
+   viewModel: function(params){
+       var self = this;
+       self.params = params;
+   },
+   template: '<button data-bind="attr: {class: \'btn btn-\'+params.type}, click: params.action"><span data-bind="attr:{class: params.icon}"></span> <span data-bind="attr: {class: params.label}"></span> </button>'
+});
+
+ko.components.register('grid-toolbar', {
+   viewModel: function(params){
+       var self = this;
+       self.params = params;
+   },
+   template: '<div class="app-toolbar">\
+            <button type="button" class="btn btn-success"><i class="glyphicon glyphicon-floppy-disk"></i> xxx</button>\
+        </div>'
+});
+
+ko.components.register('toolbar', {
+   viewModel: function(params){
+       var self = this;
+       self.toolbars = params.toolbars;
+   },
+   template: '<nav class="navbar navbar-default">\
+        <div class="container-fluid" data-bind="foreach: toolbars">\
+            <!-- ko if: typeof($data) === "string" -->\
+                <!--ko component: $data -->\
+                <!-- /ko -->\
+            <!-- /ko -->\
+            <!-- ko if: typeof($data) !== "string" -->\
+                <!--ko component: {\
+                    name: name,\
+                    params: params\
+                }-->\
+                <!--/ko-->\
+            <!--/ko-->\
+        </div>\
+    </nav>'
 });

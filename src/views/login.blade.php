@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="{{ url('assets/cms/css/app.min.css') }}">
 <script src="{{ url('assets/cms/js/jquery.min.js') }}"></script>
 <script src="{{ url('assets/cms/js/knockout.js') }}"></script>
-<script src="{{ url('assets/cms/js/fn.js') }}"></script>
+<script src="{{ url('assets/cms/js/fn.min.js') }}"></script>
 <style>
     body {
         padding-top: 100px;
