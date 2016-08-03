@@ -21,6 +21,26 @@ a { cursor: pointer; }
     -webkit-animation: fa-spin 2s infinite linear;
     animation: fa-spin 2s infinite linear;
 }
+@-webkit-keyframes fa-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+@keyframes fa-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
 .app-menu {
     background-color: #32393f;
     border-bottom: 1px solid #2d343a;
@@ -122,6 +142,7 @@ a { cursor: pointer; }
     width: 200px;
     height: 100%;
     position: fixed;
+    z-index: 1000;
 }
 
 .app-navi {
@@ -179,6 +200,7 @@ a { cursor: pointer; }
 
 .app-toolbar {
     margin-top: 7px;
+    margin-bottom: 7px;
 }
 
 .app-toolbar .grid-search-input {
@@ -333,13 +355,14 @@ a { cursor: pointer; }
 */
 .grid-container{
     position: relative;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 .table-header-fixed-top{
     background-color: #ccc;
-    min-width: 300px;
-    overflow: hidden;
     border-bottom: 1px solid #ccc;
+    overflow: auto;
+    min-width: 768px;
 }
 .table-header-fixed-top table th{
     cursor: pointer;
@@ -347,7 +370,6 @@ a { cursor: pointer; }
 .table-header-fixed-top table{
     background-color: #fff;
     margin-bottom: 0;
-    min-width: 768px;
 }
 .thead-hide{
     margin-top: -40px;
@@ -366,11 +388,11 @@ a { cursor: pointer; }
 .grid-container .loading.open{
     display: inline-block;
 }
-.grid-container .loading i{
+.grid-container .loading span{
     font-size: 5em;
 }
 .table-header-fixed-top .actions{
-    padding: 2px;
+    padding: 4px;
 }
 #search-wrap {
     position: relative;

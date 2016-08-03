@@ -2,12 +2,11 @@
 
 namespace InnoSoft\CMS;
 
-use App\Http\Controllers\Controller;
-
-class DashboardController extends Controller
+class DashboardController extends API
 {   
-    public function getIndex() {
-        return view('admin.cms.dashboard');
+    public function __construct() {
+        $this->table = 'users';
+        $this->view = 'admin.cms.dashboard';
     }
 }
 

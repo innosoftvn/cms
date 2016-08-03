@@ -86,42 +86,170 @@ ko.components.register('form-signin', {
     </div>'
 });
 
-ko.components.register('button-default', {
-   viewModel: function(params){
-       var self = this;
-       self.params = params;
-   },
-   template: '<button data-bind="attr: {class: \'btn btn-\'+params.type}, click: params.action"><span data-bind="attr:{class: params.icon}"></span> <span data-bind="attr: {class: params.label}"></span> </button>'
-});
-
-ko.components.register('grid-toolbar', {
-   viewModel: function(params){
-       var self = this;
-       self.params = params;
-   },
-   template: '<div class="app-toolbar">\
-            <button type="button" class="btn btn-success"><i class="glyphicon glyphicon-floppy-disk"></i> xxx</button>\
-        </div>'
-});
-
-ko.components.register('toolbar', {
-   viewModel: function(params){
-       var self = this;
-       self.toolbars = params.toolbars;
-   },
-   template: '<nav class="navbar navbar-default">\
-        <div class="container-fluid" data-bind="foreach: toolbars">\
-            <!-- ko if: typeof($data) === "string" -->\
-                <!--ko component: $data -->\
-                <!-- /ko -->\
-            <!-- /ko -->\
-            <!-- ko if: typeof($data) !== "string" -->\
-                <!--ko component: {\
-                    name: name,\
-                    params: params\
-                }-->\
-                <!--/ko-->\
-            <!--/ko-->\
+ko.components.register('grid', {
+    viewModel: function(params){
+        var self = this;
+        self.token = params.token;
+        self.url = params.url;
+        self.labels = $.map(params.cols, function(val, key) { return val; });
+        self.cols = $.map(params.cols, function(val, key) { return key; });
+        self.data_empty_label = params.data_empty_label;
+        self.sizes = [10, 20, 50, 100, 200, 500];
+        self.total = ko.observable(0);
+        self.rows = ko.observableArray([]);
+        self.ids = ko.observableArray([]);
+        self.pagenum = ko.observable(1);
+        self.pagesize = ko.observable(10);
+        self.search = ko.observable('');
+        self.sortdatafield = ko.observable('');
+        self.sortorder = ko.observable(0);
+        self.filters = ko.observableArray([]);
+        self.display = ko.observable(false);
+        self.loading = ko.observable(false);
+        self.is_fetch = false;
+        self.pagemax = ko.pureComputed(function () {
+            return Math.max(Math.ceil(self.total() / self.pagesize()), 1);
+        });
+        self.setSize = function (data) {
+            if (self.pagesize() !== data){
+                self.pagenum(1);
+                self.pagesize(data);
+            }
+        };
+        self.start = ko.pureComputed(function () {
+            return self.pagesize() * (self.pagenum() - 1) + 1;
+        });
+        self.end = ko.pureComputed(function () {
+            return Math.min(self.pagesize() * self.pagenum(), self.total());
+        });
+        self.next = function () {
+            self.pagenum(self.pagenum() + 1);
+        };
+        self.prev = function () {
+            self.pagenum(self.pagenum() - 1);
+        };
+        self.del = function () {
+            $('#cfmDel').modal('show');
+        };
+        self.sort = function (column) {
+            if(column !== self.sortdatafield()){
+                self.sortdatafield(column);
+                // self.sortorder(1);
+            }else{
+                var sort = self.sortorder() + 1;
+                if(sort > 1) sort = -1;
+                self.sortorder(sort);
+            }
+        };
+        self.toogleAll = function () {
+            if (self.ids().length === self.rows().length) {
+                self.ids([]);
+            } else {
+                var t = [];
+                ko.utils.arrayForEach(self.rows(), function (item) {
+                    t.push(item.id);
+                });
+                self.ids(t);
+            }
+            return true;
+        };
+        self.showLoading = function(){
+            self.loading(true);
+        };
+        self.hideLoading = function(){
+            self.loading(false);
+        };
+        self.doSearch = function(id){
+            self.search($('#'+id).val());
+        };
+        self.clearSearch = function(id){
+            $('#'+id).val('');
+            self.search('');
+        };
+        self.fetch = function(){
+            if(self.is_fetch) return true;
+            self.is_fetch = true;
+            $.ajax({url: self.url, type: "post", data: { _token: self.token, pagenum: self.pagenum, pagesize: self.pagesize, search: self.search, sort: self.sortdatafield, order: self.sortorder, filters: self.filters},
+                beforeSend: self.showLoading, complete: self.hideLoading,
+                success: function (data) {
+                    self.rows(data.rows);
+                    self.total(data.total);
+                    self.is_fetch = false;
+                    tableRefesh('#app-grid');
+                }
+            });
+        };
+        self.edit = function(e){
+            params.edit(e);
+        };
+        self.doDel = function(){
+            $.ajax({url: self.url, type: "post", data: {_token: self.token, ids: JSON.stringify(self.ids())},
+                beforeSend: showAppLoading, complete: hideAppLoading,
+                success: function (data) {
+                    toastr[data.status](data.message);
+                    if(data.status === 'success'){
+                        self.ids([]);
+                        self.fetch();
+                    }
+                }
+            });
+        };
+        
+        params.callback(self);
+        
+        ko.computed(self.fetch);
+        
+        $( "#app-grid .wrap-scroll").css('height', $(window).height() - 150);
+        $( window ).resize(function() {
+            $( "#app-grid .wrap-scroll").css('height', $(window).height() - 150);
+            tableRefesh('#app-grid');
+        });
+    },
+    template: '<div class="table-header-fixed-top" id="app-grid">\
+        <table class="table table-header">\
+            <thead>\
+                <tr>\
+                    <th width="30px"><input type="checkbox" data-bind="click: toogleAll,checked: ids().length===rows().length"/></th>\
+                    <!--ko foreach: labels--> \
+                    <th><span data-bind="html: $data"></span></th>\
+                    <!--/ko-->\
+                    <th></th>\
+                </tr>\
+             </thead>\
+        </table>\
+        <div class="grid-container loading-container wrap-scroll">\
+            <div class="loading" data-bind="attr: {class: loading() ? \'loading open\' : \'loading\'}"><span class="glyphicon glyphicon-refresh glyphicon-spin"></span></div>\
+            <table class="table table-hover table-content thead-hide">\
+                <thead>\
+                    <tr>\
+                        <th width="30px"><input type="checkbox" data-bind="click: toogleAll,checked: ids().length===rows().length"/></th>\
+                        <!--ko foreach: labels--> \
+                        <th><span data-bind="html: $data"></span></th>\
+                        <!--/ko-->\
+                        <th></th>\
+                    </tr>\
+                </thead>\
+                <tbody>\
+                    <!--ko foreach: {data: rows, as: \'row\'}-->\
+                    <tr data-bind="attr: {\'class\': $parent.ids().indexOf(id)>=0 ? \'active\':\'\'}">\
+                        <td>\
+                            <input type="checkbox" data-bind="checkedValue: id,checked: $parent.ids"/>\
+                        </td>\
+                       <!--ko foreach: $parent.cols-->\
+                       <td>\
+                           <span data-bind="html: row[$data]"></span>\
+                       </td>\
+                       <!--/ko-->\
+                       <td class="text-right actions">\
+                           <button class="btn btn-default btn-sm" data-bind="click: $parent.edit"><span class="glyphicon glyphicon-edit"></span></button>\
+                       </td>\
+                    </tr>\
+                    <!--/ko-->\
+                    <tr data-bind="visible: rows().length==0 " style="display: none;">\
+                        <td data-bind="attr: {colspan: cols.length + 2}, html: data_empty_label" class="text-center active"></td>\
+                    </tr>\
+                </tbody>\
+           </table>\
         </div>\
-    </nav>'
+    </div>'
 });
