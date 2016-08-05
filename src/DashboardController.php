@@ -5,8 +5,9 @@ namespace InnoSoft\CMS;
 class DashboardController extends API
 {   
     public function __construct() {
-        $this->table = 'users';
+        $this->M = new Account();
         $this->view = 'admin.cms.dashboard';
+        $this->validator_msg = [];
     }
 }
 

@@ -6,18 +6,40 @@ use App\Http\Controllers\Controller;
 
 class API extends Controller
 {
-    protected $table = null;
+    protected $M = null;
     protected $view = null;
+    protected $validator_msg = [];
 
-    protected function callback_index($data){ return $data; }
+    protected function prepare_index(){
+        return $this->M->where('id', '>', 0);
+    }
+    
+    protected function prepare_add(){
+        // handle before insert data
+    }
+    
+    protected function prepare_update(){
+        // handle before update data
+    }
+    
+    protected function prepare_delete($ids){
+        return $ids;
+    }
+    
+    protected function callback_index($data){ 
+        return $data; 
+    }
+    
+    protected function callback_add($data){ 
+        return $data;
+    }
 
     public function getIndex() {
         return view($this->view);
     }
     
     public function postIndex() {
-        $M = $this->table;
-        $query = is_string($M) ? \DB::table($M)->where('id', '>', 0)->orderBy('id', 'desc') : $M;
+        $query = $this->prepare_index();
         if (\Request::has('search'))
             $query->where(function($query)
             {
@@ -41,5 +63,43 @@ class API extends Controller
         $query->take(\Request::get('pagesize', 10));
         $result['rows']  = $query->get();
         return $this->callback_index($result);
+    }
+    
+    public function postAdd(){
+        $this->prepare_add();
+        $validator = \Validator::make(\Request::all(), $this->M->rules, $this->validator_msg);
+        if ($validator->fails()) return ['status'=>'error', 'message'=> implode('<br>', $validator->errors()->all())];
+        try {
+            $model = $this->M->create(\Request::all());
+        } catch (\Exception $e) {
+            return ['status'=>'error', 'message'=>trans('cms::cms.create_error_msg'), 'info'=>$e->getMessage()];
+        }
+        $this->callback_add($model);
+        return ['status'=>'success', 'message'=>trans('cms::cms.create_success_msg')];
+    }
+    
+    public function postUpdate(){
+        try {
+            $this->prepare_update();
+            $r = $this->M->findOrFail(\Request::get('id'));
+            $validator = \Validator::make(\Request::all(), $this->M->rules);
+            $validator->setAttributeNames( $this->validator_msg ); 
+            if ($validator->fails()) return ['status'=>'error', 'message'=> implode('<br>', $validator->errors()->all())];
+            $r->update(\Request::all());
+        } catch(\Exception $e) {
+            return ['status'=>'error', 'message'=>trans('cms::cms.update_error_msg'), 'info'=>$e->getMessage()];
+        }
+        return ['status' => 'success', 'message' => trans('cms::cms.update_success_msg')];
+    }
+    
+    public function postDelete(){
+        try {
+            $ids = json_decode(\Request::get('ids'));
+            $this->prepare_delete($ids);
+            $this->M->destroy( $ids );
+        } catch(\Exception $e) {
+            return [ 'status' => 'error', 'message'=> trans('cms::cms.delete_error_msg'), 'info'=>$e->getMessage()];
+        }
+        return ['status' => 'success', 'message' => trans('cms::cms.delete_success_msg', ["delNum"=>count($ids)])];
     }
 }

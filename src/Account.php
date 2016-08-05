@@ -21,6 +21,8 @@ class Account extends Authenticatable
         'protected',
         'anonymous',
     ];
+    
+    public $rules = [];
 
     protected $hidden = [
         'password', 'remember_token',

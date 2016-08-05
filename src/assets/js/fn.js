@@ -101,6 +101,7 @@ ko.components.register('grid', {
         self.pagenum = ko.observable(1);
         self.pagesize = ko.observable(10);
         self.search = ko.observable('');
+        self.sorts = params.sorts;
         self.sortdatafield = ko.observable('');
         self.sortorder = ko.observable(0);
         self.filters = ko.observableArray([]);
@@ -199,19 +200,24 @@ ko.components.register('grid', {
         
         ko.computed(self.fetch);
         
-        $( "#app-grid .wrap-scroll").css('height', $(window).height() - 150);
+        $( "#app-grid .wrap-scroll").css('height', $(window).height() - 135);
         $( window ).resize(function() {
-            $( "#app-grid .wrap-scroll").css('height', $(window).height() - 150);
+            $( "#app-grid .wrap-scroll").css('height', $(window).height() - 135);
             tableRefesh('#app-grid');
         });
     },
-    template: '<div class="table-header-fixed-top" id="app-grid">\
+    template: '<div class="table-header-fixed-top" id="app-grid" data-bind="visible: display" style="display: none;">\
         <table class="table table-header">\
             <thead>\
                 <tr>\
                     <th width="30px"><input type="checkbox" data-bind="click: toogleAll,checked: ids().length===rows().length"/></th>\
-                    <!--ko foreach: labels--> \
-                    <th><span data-bind="html: $data"></span></th>\
+                    <!--ko foreach: {data: labels, as: \'labels\' }--> \
+                        <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) < 0 --> \
+                            <th><span data-bind="html: $parent.cols[$index()]"></span></th>\
+                        <!--/ko-->\
+                        <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) >= 0 --> \
+                            <th class="sortdatafield" data-bind="click: $parent.sort.bind($data, $parent.cols[$index()])"><span data-bind="html: $data"></span> <span data-bind="attr: {class: $parent.sortdatafield() != $parent.cols[$index()] || $parent.sortorder()==0 ? \'sort\' : $parent.sortorder()==1 ? \'sortasc\' : \'sortdesc\'}"></span></th>\
+                        <!--/ko-->\
                     <!--/ko-->\
                     <th></th>\
                 </tr>\
@@ -219,12 +225,17 @@ ko.components.register('grid', {
         </table>\
         <div class="grid-container loading-container wrap-scroll">\
             <div class="loading" data-bind="attr: {class: loading() ? \'loading open\' : \'loading\'}"><span class="glyphicon glyphicon-refresh glyphicon-spin"></span></div>\
-            <table class="table table-hover table-content thead-hide">\
+            <table class="table table-hover table-content table-striped thead-hide">\
                 <thead>\
                     <tr>\
                         <th width="30px"><input type="checkbox" data-bind="click: toogleAll,checked: ids().length===rows().length"/></th>\
-                        <!--ko foreach: labels--> \
-                        <th><span data-bind="html: $data"></span></th>\
+                        <!--ko foreach: {data: labels, as: \'labels\' }--> \
+                            <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) < 0 --> \
+                                <th><span data-bind="html: $parent.cols[$index()]"></span></th>\
+                            <!--/ko-->\
+                            <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) >= 0 --> \
+                                <th class="sortdatafield" data-bind="click: $parent.sort.bind($data, $parent.cols[$index()])"><span data-bind="html: $data"></span> <span data-bind="attr: {class: $parent.sortdatafield() != $parent.cols[$index()] || $parent.sortorder()==0 ? \'sort\' : $parent.sortorder()==1 ? \'sortasc\' : \'sortdesc\'}"></span></th>\
+                            <!--/ko-->\
                         <!--/ko-->\
                         <th></th>\
                     </tr>\
