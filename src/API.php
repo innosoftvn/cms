@@ -61,7 +61,18 @@ class API extends Controller
         $result['total'] = $query->count();
         $query->skip((\Request::get('pagenum', 1)-1)*\Request::get('pagesize', 10));
         $query->take(\Request::get('pagesize', 10));
-        $result['rows']  = $query->get();
+        if(\Request::has('groupby')){
+            $groupby_query = clone $query;
+            $groupby_query = $groupby_query->select(\Request::get('groupby'), \DB::raw('count(*) as total'))->groupBy(\Request::get('groupby'));
+            $groups = $groupby_query->get();
+            foreach ($groups as $group){
+                $row_group = clone $query;
+                $group['rows'] = $row_group->where(\Request::get('groupby'), $group[\Request::get('groupby')])->get();
+            }
+            $result['rows'] = $groups;
+        }else{
+            $result['rows']  = $query->get();
+        }
         return $this->callback_index($result);
     }
     

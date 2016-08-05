@@ -401,6 +401,12 @@ a { cursor: pointer; }
     background-color: #d9edf7;
     border-top: 1px solid #bce8f1; 
 }
+.table-header-fixed-top .table>tbody>tr.group-header>td{
+    padding-left: 15px;
+    padding-right: 15px;
+    font-weight: 700;
+    background-color: #ddd !important;
+}
 .table-header-fixed-top table th{
     cursor: pointer;
 }

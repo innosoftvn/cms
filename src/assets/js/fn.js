@@ -104,6 +104,7 @@ ko.components.register('grid', {
         self.sorts = params.sorts;
         self.sortdatafield = ko.observable('');
         self.sortorder = ko.observable(0);
+        self.groupby = ko.observable(params.groupby === undefined ? '':params.groupby);
         self.filters = ko.observableArray([]);
         self.display = ko.observable(false);
         self.loading = ko.observable(false);
@@ -143,17 +144,37 @@ ko.components.register('grid', {
             }
         };
         self.toogleAll = function () {
-            if (self.ids().length === self.rows().length) {
-                self.ids([]);
-            } else {
-                var t = [];
-                ko.utils.arrayForEach(self.rows(), function (item) {
-                    t.push(item.id);
-                });
-                self.ids(t);
+            if(self.checkAll()) self.ids([]);
+            else{
+                if(self.groupby() === ''){
+                    var t = [];
+                    ko.utils.arrayForEach(self.rows(), function (item) {
+                        t.push(item.id);
+                    });
+                    self.ids(t);
+                }else{
+                    var t = [];
+                    ko.utils.arrayForEach(self.rows(), function (group) {
+                        ko.utils.arrayForEach(group.rows, function (item) {
+                            t.push(item.id);
+                        });
+                    });
+                    self.ids(t);
+                }
             }
             return true;
         };
+        self.checkAll = ko.pureComputed(function(){
+            if(self.groupby() === '') {
+                return (self.ids().length === self.rows().length);
+            }else{
+                var t = 0;
+                ko.utils.arrayForEach(self.rows(), function (item) {
+                    t+=item.total;
+                });
+                return self.ids().length === t;
+            }
+        }, self);
         self.showLoading = function(){
             self.loading(true);
         };
@@ -170,7 +191,7 @@ ko.components.register('grid', {
         self.fetch = function(){
             if(self.is_fetch) return true;
             self.is_fetch = true;
-            $.ajax({url: self.url, type: "post", data: { _token: self.token, pagenum: self.pagenum, pagesize: self.pagesize, search: self.search, sort: self.sortdatafield, order: self.sortorder, filters: self.filters},
+            $.ajax({url: self.url, type: "post", data: { _token: self.token, pagenum: self.pagenum, pagesize: self.pagesize, search: self.search, sort: self.sortdatafield, order: self.sortorder, groupby: self.groupby, filters: self.filters},
                 beforeSend: self.showLoading, complete: self.hideLoading,
                 success: function (data) {
                     self.rows(data.rows);
@@ -210,13 +231,15 @@ ko.components.register('grid', {
         <table class="table table-header">\
             <thead>\
                 <tr>\
-                    <th width="30px"><input type="checkbox" data-bind="click: toogleAll,checked: ids().length===rows().length"/></th>\
+                    <th width="30px"><input type="checkbox" data-bind="click: toogleAll,checked: checkAll"/></th>\
                     <!--ko foreach: {data: labels, as: \'labels\' }--> \
-                        <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) < 0 --> \
-                            <th><span data-bind="html: $parent.cols[$index()]"></span></th>\
-                        <!--/ko-->\
-                        <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) >= 0 --> \
-                            <th class="sortdatafield" data-bind="click: $parent.sort.bind($data, $parent.cols[$index()])"><span data-bind="html: $data"></span> <span data-bind="attr: {class: $parent.sortdatafield() != $parent.cols[$index()] || $parent.sortorder()==0 ? \'sort\' : $parent.sortorder()==1 ? \'sortasc\' : \'sortdesc\'}"></span></th>\
+                        <!--ko if: $parent.groupby()===\'\' || $parent.cols[$index()] !== $parent.groupby() -->\
+                            <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) < 0 --> \
+                                <th><span data-bind="html: $parent.cols[$index()]"></span></th>\
+                            <!--/ko-->\
+                            <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) >= 0 --> \
+                                <th class="sortdatafield" data-bind="click: $parent.sort.bind($data, $parent.cols[$index()])"><span data-bind="html: $data"></span> <span data-bind="attr: {class: $parent.sortdatafield() != $parent.cols[$index()] || $parent.sortorder()==0 ? \'sort\' : $parent.sortorder()==1 ? \'sortasc\' : \'sortdesc\'}"></span></th>\
+                            <!--/ko-->\
                         <!--/ko-->\
                     <!--/ko-->\
                     <th></th>\
@@ -230,31 +253,63 @@ ko.components.register('grid', {
                     <tr>\
                         <th width="30px"><input type="checkbox" data-bind="click: toogleAll,checked: ids().length===rows().length"/></th>\
                         <!--ko foreach: {data: labels, as: \'labels\' }--> \
-                            <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) < 0 --> \
-                                <th><span data-bind="html: $parent.cols[$index()]"></span></th>\
-                            <!--/ko-->\
-                            <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) >= 0 --> \
-                                <th class="sortdatafield" data-bind="click: $parent.sort.bind($data, $parent.cols[$index()])"><span data-bind="html: $data"></span> <span data-bind="attr: {class: $parent.sortdatafield() != $parent.cols[$index()] || $parent.sortorder()==0 ? \'sort\' : $parent.sortorder()==1 ? \'sortasc\' : \'sortdesc\'}"></span></th>\
+                            <!--ko if: $parent.groupby()===\'\' || $parent.cols[$index()] !== $parent.groupby() -->\
+                                <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) < 0 --> \
+                                    <th><span data-bind="html: $parent.cols[$index()]"></span></th>\
+                                <!--/ko-->\
+                                <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) >= 0 --> \
+                                    <th class="sortdatafield" data-bind="click: $parent.sort.bind($data, $parent.cols[$index()])"><span data-bind="html: $data"></span> <span data-bind="attr: {class: $parent.sortdatafield() != $parent.cols[$index()] || $parent.sortorder()==0 ? \'sort\' : $parent.sortorder()==1 ? \'sortasc\' : \'sortdesc\'}"></span></th>\
+                                <!--/ko-->\
                             <!--/ko-->\
                         <!--/ko-->\
                         <th></th>\
                     </tr>\
                 </thead>\
                 <tbody>\
-                    <!--ko foreach: {data: rows, as: \'row\'}-->\
-                    <tr data-bind="attr: {\'class\': $parent.ids().indexOf(id)>=0 ? \'active\':\'\'}">\
-                        <td>\
-                            <input type="checkbox" data-bind="checkedValue: id,checked: $parent.ids"/>\
-                        </td>\
-                       <!--ko foreach: $parent.cols-->\
-                       <td>\
-                           <span data-bind="html: row[$data]"></span>\
-                       </td>\
-                       <!--/ko-->\
-                       <td class="text-right actions">\
-                           <button class="btn btn-default btn-sm" data-bind="click: $parent.edit"><span class="glyphicon glyphicon-edit"></span></button>\
-                       </td>\
-                    </tr>\
+                    <!--ko if: groupby()===\'\'-->\
+                        <!--ko foreach: {data: rows, as: \'row\'}-->\
+                            <tr data-bind="attr: {\'class\': $parent.ids().indexOf(id)>=0 ? \'active\':\'\'}">\
+                                <td>\
+                                    <input type="checkbox" data-bind="checkedValue: id,checked: $parent.ids"/>\
+                                </td>\
+                               <!--ko foreach: $parent.cols-->\
+                               <td>\
+                                   <span data-bind="html: row[$data]"></span>\
+                               </td>\
+                               <!--/ko-->\
+                               <td class="text-right actions">\
+                                   <button class="btn btn-default btn-sm" data-bind="click: $parent.edit"><span class="glyphicon glyphicon-edit"></span></button>\
+                               </td>\
+                            </tr>\
+                        <!--/ko-->\
+                    <!--/ko-->\
+                    <!--ko if: groupby()!==\'\'-->\
+                        <!--ko foreach: {data: rows, as: \'row\'}-->\
+                            <!--ko if: row.rows!==undefined-->\
+                                <tr class="group-header">\
+                                    <td data-bind="attr:{colspan: $parent.cols.length + 1}">\
+                                        <span data-bind="html: row[$parent.groupby()]"></span> <span data-bind="html: row.total" class="label label-default"></span>\
+                                    </td>\
+                                </tr>\
+                                <!--ko foreach: {data: row.rows, as: \'row_group\'}-->\
+                                    <tr data-bind="attr: {\'class\': $parents[1].ids().indexOf(row_group.id)>=0 ? \'active\':\'\'}">\
+                                        <td>\
+                                            <input type="checkbox" data-bind="checkedValue: row_group.id,checked: $parents[1].ids"/>\
+                                        </td>\
+                                       <!--ko foreach: $parents[1].cols-->\
+                                            <!--ko if: $parents[2].cols[$index()] !== $parents[2].groupby() -->\
+                                                <td>\
+                                                    <span data-bind="html: row_group[$data]"></span>\
+                                                </td>\
+                                            <!--/ko-->\
+                                       <!--/ko-->\
+                                       <td class="text-right actions">\
+                                           <button class="btn btn-default btn-sm" data-bind="click: $parents[1].edit"><span class="glyphicon glyphicon-edit"></span></button>\
+                                       </td>\
+                                    </tr>\
+                                <!--/ko-->\
+                            <!--/ko-->\
+                        <!--/ko-->\
                     <!--/ko-->\
                     <tr data-bind="visible: rows().length==0 " style="display: none;">\
                         <td data-bind="attr: {colspan: cols.length + 2}, html: data_empty_label" class="text-center active"></td>\
