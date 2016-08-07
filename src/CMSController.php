@@ -9,7 +9,7 @@ class CMSController extends Controller
     public function route($paths = ''){
         $method = strtolower(\Request::method());
         // authentication
-        if($paths === '') return redirect ('admin/login');
+        if($paths === '') return redirect (config('cms.backend_prefix') . '/login');
         if(in_array($paths, ['login', 'logout'])){
             return \App::make('\InnoSoft\CMS\AdminAuthController')->{$method.studly_case($paths)}();
         }

@@ -16,14 +16,14 @@ class AdminAuthController extends AuthController
    
     public function getLogin()
     {
-        if(\Auth::check() && \Auth::user()->login_backend) return redirect ('admin/dashboard');
+        if(\Auth::check() && \Auth::user()->login_backend) return redirect (config('cms.backend_prefix') . '/dashboard');
         return view('cms::login');
     }
     
     function getLogout()
     {
         \Auth::logout();
-        return redirect('admin/login');
+        return redirect(config('cms.backend_prefix') . '/login');
     }
 }
 

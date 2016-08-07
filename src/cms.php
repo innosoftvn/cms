@@ -5,6 +5,6 @@
  */
 
 return [
-    
+    'backend_prefix' => 'admin'
 ];
 
