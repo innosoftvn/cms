@@ -40,12 +40,21 @@ class API extends Controller
     
     public function postIndex() {
         $query = $this->prepare_index();
-        if (\Request::has('search'))
-            $query->where(function($query)
+        if (\Request::has('search')){
+            $cols = clone $query;
+            $cols = $cols->first();
+            if(method_exists($cols, 'getAttributes')){
+                $cols = $cols->getAttributes();
+            }
+            $cols = array_keys((array) $cols);
+            $query->where(function($query) use ($cols)
             {
                 $search = \Request::get('search');
-                $query->whereRaw('*', 'like', '%'.$search.'%');
+                foreach ($cols as $col){
+                    $query->orWhere($col, 'like', '%'.$search.'%');
+                }
             });
+        }
         if(\Request::has('filters')){
             $query->where(function($query)
             {

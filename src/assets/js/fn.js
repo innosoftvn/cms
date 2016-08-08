@@ -92,6 +92,8 @@ ko.components.register('grid', {
         self.token = params.token;
         self.url = params.url;
         self.labels = $.map(params.cols, function(val, key) { return val; });
+        self.trans = params.trans;
+        self.buttons = params.buttons;
         self.cols = $.map(params.cols, function(val, key) { return key; });
         self.data_empty_label = params.data_empty_label;
         self.sizes = [10, 20, 50, 100, 200, 500];
@@ -182,6 +184,7 @@ ko.components.register('grid', {
             self.loading(false);
         };
         self.doSearch = function(id){
+            if(self.is_fetch) return true;
             self.search($('#'+id).val());
         };
         self.clearSearch = function(id){
@@ -189,7 +192,6 @@ ko.components.register('grid', {
             self.search('');
         };
         self.fetch = function(){
-            if(self.is_fetch) return true;
             self.is_fetch = true;
             $.ajax({url: self.url, type: "post", data: { _token: self.token, pagenum: self.pagenum, pagesize: self.pagesize, search: self.search, sort: self.sortdatafield, order: self.sortorder, groupby: self.groupby, filters: self.filters},
                 beforeSend: self.showLoading, complete: self.hideLoading,
@@ -201,11 +203,18 @@ ko.components.register('grid', {
                 }
             });
         };
+        self.add = function(){
+            if(params.add !== undefined) params.add();
+        };
         self.edit = function(e){
-            params.edit(e);
+            if(params.edit !== undefined) params.edit(e);
+        };
+        self.ref = function(){
+            if(self.is_fetch) return true;
+            self.fetch();
         };
         self.doDel = function(){
-            $.ajax({url: self.url, type: "post", data: {_token: self.token, ids: JSON.stringify(self.ids())},
+            $.ajax({url: self.url + '/delete', type: "post", data: {_token: self.token, ids: JSON.stringify(self.ids())},
                 beforeSend: showAppLoading, complete: hideAppLoading,
                 success: function (data) {
                     toastr[data.status](data.message);
@@ -216,8 +225,7 @@ ko.components.register('grid', {
                 }
             });
         };
-        
-        params.callback(self);
+        if(params.callback !== undefined) params.callback(self);
         
         ko.computed(self.fetch);
         
@@ -227,7 +235,49 @@ ko.components.register('grid', {
             tableRefesh('#app-grid');
         });
     },
-    template: '<div class="table-header-fixed-top" id="app-grid" data-bind="visible: display" style="display: none;">\
+    template: '\
+    <nav class="navbar navbar-default" data-bind="visible: display" style="display: none;">\
+        <div class="container-fluid">\
+            <div class="app-toolbar">\
+                <div class="pull-left">\
+                    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">\
+                        <!-- ko if: buttons.indexOf("add") !== -1 -->\
+                            <button data-bind="click: add" type="button" class="btn btn-default" ><span class="glyphicon glyphicon-plus"></span> <span data-bind="html: trans.add"></span></button>\
+                        <!--/ko-->\
+                        <button data-bind="click: ref, attr:{title: trans.refresh}" type="button" class="btn btn-default" data-toggle="tooltip"><span class="glyphicon glyphicon-refresh"></span></button>\
+                        <button data-bind="click: del, enable: ids().length>0, attr:{title: trans.delete}" type="button" class="btn btn-default" data-toggle="tooltip"><span class="glyphicon glyphicon-trash"></span></button>\
+                        <div class="btn-group">\
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">\
+                                <span data-bind="text: pagesize"></span>\
+                                <span class="caret"></span>\
+                            </button>\
+                            <ul class="dropdown-menu">\
+                                <!--ko foreach: sizes-->\
+                                    <!-- ko if: $parent.sizes[$index() -1 ] <= $parent.total() || $index()==0 -->\
+                                    <li data-bind="click: $parent.setSize"><a data-bind="text: $data"></a></li>\
+                                    <!--/ko-->\
+                                <!--/ko-->\
+                            </ul>\
+                        </div>\
+                    </div>\
+                </div>\
+                <div class="pull-right">\
+                    <div class="pagination">\
+                        <span><b data-bind="html: start"></b>-<b data-bind="html: end"></b> <span data-bind="html: trans.pagination_of_total"></span> <b data-bind="html: total"></b></span>\
+                        <div class="btn-group" role="group">\
+                            <button type="button" class="btn btn-default" data-bind="click: prev, enable: pagenum()>1"><span class="glyphicon glyphicon-chevron-left"></span></button>\
+                            <button type="button" class="btn btn-default" data-bind="click: next, enable: pagenum()<pagemax()"><span class="glyphicon glyphicon-chevron-right"></span></button>\
+                        </div>\
+                    </div>\
+                    <div id="search-wrap">\
+                        <input type="text" class="form-control" id="search-warehouse" data-bind="attr: {placeholder: trans.search}, event: {keyup: doSearch.bind($data, \'search-warehouse\')} ">\
+                        <i id="search-clear" class="glyphicon glyphicon-remove" data-bind="click: clearSearch.bind($data, \'search-warehouse\'), attr: {\'data-toggle\': search()!=\'\'}"></i>\
+                    </div>\
+                </div>\
+            </div>\
+        </div>\
+    </nav>\
+    <div class="table-header-fixed-top" id="app-grid" data-bind="visible: display" style="display: none;">\
         <table class="table table-header">\
             <thead>\
                 <tr>\
@@ -278,8 +328,10 @@ ko.components.register('grid', {
                                </td>\
                                <!--/ko-->\
                                <td class="text-right actions">\
-                                   <button class="btn btn-default btn-sm" data-bind="click: $parent.edit"><span class="glyphicon glyphicon-edit"></span></button>\
-                               </td>\
+                                    <!-- ko if: $parent.buttons.indexOf("edit") !== -1 -->\
+                                        <button class="btn btn-default btn-sm" data-bind="click: $parent.edit"><span class="glyphicon glyphicon-edit"></span></button>\
+                                    <!--/ko-->\
+                                </td>\
                             </tr>\
                         <!--/ko-->\
                     <!--/ko-->\
@@ -303,19 +355,33 @@ ko.components.register('grid', {
                                                 </td>\
                                             <!--/ko-->\
                                        <!--/ko-->\
-                                       <td class="text-right actions">\
-                                           <button class="btn btn-default btn-sm" data-bind="click: $parents[1].edit"><span class="glyphicon glyphicon-edit"></span></button>\
-                                       </td>\
+                                        <td class="text-right actions">\
+                                            <!-- ko if: $parents[1].buttons.indexOf("edit") !== -1 -->\
+                                                <button class="btn btn-default btn-sm" data-bind="click: $parents[1].edit"><span class="glyphicon glyphicon-edit"></span></button>\
+                                            <!--/ko-->\
+                                        </td>\
                                     </tr>\
                                 <!--/ko-->\
                             <!--/ko-->\
                         <!--/ko-->\
                     <!--/ko-->\
                     <tr data-bind="visible: rows().length==0 " style="display: none;">\
-                        <td data-bind="attr: {colspan: cols.length + 2}, html: data_empty_label" class="text-center active"></td>\
+                        <td data-bind="attr: {colspan: cols.length + 2}, html: trans.data_empty_label" class="text-center active"></td>\
                     </tr>\
                 </tbody>\
            </table>\
+        </div>\
+    </div>\
+    <!--cfmDel-->\
+    <div class="modal" id="cfmDel" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="cfmDel" aria-hidden="true">\
+        <div class="modal-dialog">\
+            <div class="modal-content modal-delete">\
+                <div class="modal-body">\
+                    <h3 data-bind="html: trans.delete_question"></h3><br>\
+                    <button class="btn btn-default" data-dismiss="modal" data-bind="html: trans.cancel"></button>\
+                    <button class="btn btn-danger" data-dismiss="modal" data-bind="click: doDel, html: trans.delete"></button>\
+                </div>\
+            </div>\
         </div>\
     </div>'
 });

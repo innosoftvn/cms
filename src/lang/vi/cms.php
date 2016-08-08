@@ -21,5 +21,6 @@ return [
     '404_title'           => 'Không tìm thấy trang',
     '404_text'            => 'Trang mà bạn muốn truy cập không được tìm thấy.',
     '404_return'          => 'Trở lại trang chủ',
+    "delete_question"     => "Bạn chắc chắn muốn xoá dữ liệu này?",
 ];
 
