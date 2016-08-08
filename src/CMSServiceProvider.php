@@ -41,7 +41,7 @@ class CMSServiceProvider extends ServiceProvider
             // langs
             __DIR__.'/lang/en/app.php' => resource_path('lang/en/app.php'),
             __DIR__.'/lang/en/validation.php' => resource_path('lang/en/validation.php')
-        ]);
+        ], 'cms');
     }
 
     /**

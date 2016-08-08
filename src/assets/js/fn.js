@@ -262,7 +262,7 @@ ko.components.register('grid', {
                     </div>\
                 </div>\
                 <div class="pull-right">\
-                    <div class="pagination">\
+                    <div class="pagination" data-bind="visible: total() > 0">\
                         <span><b data-bind="html: start"></b>-<b data-bind="html: end"></b> <span data-bind="html: trans.pagination_of_total"></span> <b data-bind="html: total"></b></span>\
                         <div class="btn-group" role="group">\
                             <button type="button" class="btn btn-default" data-bind="click: prev, enable: pagenum()>1"><span class="glyphicon glyphicon-chevron-left"></span></button>\
@@ -285,7 +285,7 @@ ko.components.register('grid', {
                     <!--ko foreach: {data: labels, as: \'labels\' }--> \
                         <!--ko if: $parent.groupby()===\'\' || $parent.cols[$index()] !== $parent.groupby() -->\
                             <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) < 0 --> \
-                                <th><span data-bind="html: $parent.cols[$index()]"></span></th>\
+                                <th><span data-bind="html: $data"></span></th>\
                             <!--/ko-->\
                             <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) >= 0 --> \
                                 <th class="sortdatafield" data-bind="click: $parent.sort.bind($data, $parent.cols[$index()])"><span data-bind="html: $data"></span> <span data-bind="attr: {class: $parent.sortdatafield() != $parent.cols[$index()] || $parent.sortorder()==0 ? \'sort\' : $parent.sortorder()==1 ? \'sortasc\' : \'sortdesc\'}"></span></th>\
@@ -305,7 +305,7 @@ ko.components.register('grid', {
                         <!--ko foreach: {data: labels, as: \'labels\' }--> \
                             <!--ko if: $parent.groupby()===\'\' || $parent.cols[$index()] !== $parent.groupby() -->\
                                 <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) < 0 --> \
-                                    <th><span data-bind="html: $parent.cols[$index()]"></span></th>\
+                                    <th><span data-bind="html: $data"></span></th>\
                                 <!--/ko-->\
                                 <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) >= 0 --> \
                                     <th class="sortdatafield" data-bind="click: $parent.sort.bind($data, $parent.cols[$index()])"><span data-bind="html: $data"></span> <span data-bind="attr: {class: $parent.sortdatafield() != $parent.cols[$index()] || $parent.sortorder()==0 ? \'sort\' : $parent.sortorder()==1 ? \'sortasc\' : \'sortdesc\'}"></span></th>\
