@@ -26,7 +26,7 @@ class AuthController extends Controller
         $validation = \Validator::make(\Request::all(), $rules);
         if ($validation->passes()) {
             if (\Auth::attempt($login_data, \Request::get('remember-me'))) {
-                Account::where('id', \Auth::user()->id)->update(['last_login'=>date("Y-m-d H:i:s", time())]);
+                \App::make(config('auth.providers.users.model'))->where('id', \Auth::user()->id)->update(['last_login'=>date("Y-m-d H:i:s", time())]);
                 return ['status'=>'success', 'message'=>trans('cms::auth.login_success_msg')];
             }
         }

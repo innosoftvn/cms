@@ -24,7 +24,7 @@
         <div class="collapse navbar-collapse" id="navbar-menu">
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-user"></span> {{ \InnoSoft\CMS\Account::get_info()->fullname }} <span class="caret"></span></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-user"></span> {{ \App::make(config('auth.providers.users.model'))->get_info()->fullname }} <span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
                         
                         <li class="divider"></li>
