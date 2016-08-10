@@ -21,5 +21,6 @@ return [
     '404_title'           => 'Page not found',
     '404_text'            => 'whoops, looks like something went wrong.',
     '404_return'          => 'Back to homepage',
+    "delete_question"     => "Are you sure you want to delete this data?",
 ];
 

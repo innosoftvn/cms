@@ -476,3 +476,7 @@ a { cursor: pointer; }
     background-color: rgba(0, 0, 0, 0.04);
 }
 /*end grid*/
+
+.form-group {
+    margin-bottom: 5px;
+}

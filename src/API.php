@@ -41,19 +41,30 @@ class API extends Controller
     public function postIndex() {
         $query = $this->prepare_index();
         if (\Request::has('search')){
-            $cols = clone $query;
-            $cols = $cols->first();
-            if(method_exists($cols, 'getAttributes')){
-                $cols = $cols->getAttributes();
-            }
-            $cols = array_keys((array) $cols);
-            $query->where(function($query) use ($cols)
-            {
-                $search = \Request::get('search');
-                foreach ($cols as $col){
-                    $query->orWhere($col, 'like', '%'.$search.'%');
+            if(isset($query->columns) && $query->columns != null){
+                $cols = $query->columns;
+                $query->where(function($query) use ($cols)
+                {
+                    $search = \Request::get('search');
+                    foreach ($cols as $col){
+                        $query->orWhere($col, 'like', '%'.$search.'%');
+                    }
+                });
+            }else{
+                $cols = clone $query;
+                $cols = $cols->first();
+                if(method_exists($cols, 'getAttributes')){
+                    $cols = $cols->getAttributes();
                 }
-            });
+                $cols = array_keys((array) $cols);
+                $query->where(function($query) use ($cols)
+                {
+                    $search = \Request::get('search');
+                    foreach ($cols as $col){
+                        $query->orWhere($col, 'like', '%'.$search.'%');
+                    }
+                });
+            }
         }
         if(\Request::has('filters')){
             $query->where(function($query)
@@ -76,7 +87,7 @@ class API extends Controller
             $groups = $groupby_query->get();
             foreach ($groups as $group){
                 $row_group = clone $query;
-                $group['rows'] = $row_group->where(\Request::get('groupby'), $group[\Request::get('groupby')])->get();
+                $group->rows = $row_group->where(\Request::get('groupby'), $group->{\Request::get('groupby')})->get();
             }
             $result['rows'] = $groups;
         }else{
