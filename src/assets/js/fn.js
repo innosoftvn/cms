@@ -96,7 +96,7 @@ ko.components.register('grid', {
         self.buttons = params.buttons;
         self.cols = $.map(params.cols, function(val, key) { return key; });
         self.data_empty_label = params.data_empty_label;
-        self.sizes = [10, 20, 50, 100, 200, 500];
+        self.sizes = [25, 50, 100, 200, 500];
         self.total = ko.observable(0);
         self.rows = ko.observableArray([]);
         self.ids = ko.observableArray([]);
