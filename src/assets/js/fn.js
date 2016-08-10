@@ -101,7 +101,7 @@ ko.components.register('grid', {
         self.rows = ko.observableArray([]);
         self.ids = ko.observableArray([]);
         self.pagenum = ko.observable(1);
-        self.pagesize = ko.observable(10);
+        self.pagesize = ko.observable(25);
         self.search = ko.observable('');
         self.sorts = params.sorts;
         self.sortdatafield = ko.observable('');
