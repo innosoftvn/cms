@@ -16,14 +16,16 @@ class API extends Controller
     
     protected function prepare_add(){
         // handle before insert data
+        return ['status'=>'success'];
     }
     
     protected function prepare_update(){
         // handle before update data
+        return ['status'=>'success'];
     }
     
-    protected function prepare_delete($ids){
-        return $ids;
+    protected function prepare_delete(){
+        return ['status'=>'success'];
     }
     
     protected function callback_index($data){ 
@@ -97,7 +99,8 @@ class API extends Controller
     }
     
     public function postAdd(){
-        $this->prepare_add();
+        $pre = $this->prepare_add();
+        if($pre['status'] !== 'success') return $pre;
         $validator = \Validator::make(\Request::all(), $this->M->rules, $this->validator_msg);
         if ($validator->fails()) return ['status'=>'error', 'message'=> implode('<br>', $validator->errors()->all())];
         try {
@@ -111,7 +114,8 @@ class API extends Controller
     
     public function postUpdate(){
         try {
-            $this->prepare_update();
+            $pre = $this->prepare_update();
+            if($pre['status'] !== 'success') return $pre;
             $r = $this->M->findOrFail(\Request::get('id'));
             $validator = \Validator::make(\Request::all(), $this->M->rules);
             $validator->setAttributeNames( $this->validator_msg ); 
@@ -126,7 +130,8 @@ class API extends Controller
     public function postDelete(){
         try {
             $ids = json_decode(\Request::get('ids'));
-            $this->prepare_delete($ids);
+            $pre = $this->prepare_delete();
+            if($pre['status'] !== 'success') return $pre;
             $this->M->destroy( $ids );
         } catch(\Exception $e) {
             return [ 'status' => 'error', 'message'=> trans('cms::cms.delete_error_msg'), 'info'=>$e->getMessage()];
