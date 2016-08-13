@@ -24,7 +24,7 @@ class API extends Controller
         return ['status'=>'success'];
     }
     
-    protected function prepare_delete(){
+    protected function prepare_delete($ids){
         return ['status'=>'success'];
     }
     
@@ -130,7 +130,7 @@ class API extends Controller
     public function postDelete(){
         try {
             $ids = json_decode(\Request::get('ids'));
-            $pre = $this->prepare_delete();
+            $pre = $this->prepare_delete($ids);
             if($pre['status'] !== 'success') return $pre;
             $this->M->destroy( $ids );
         } catch(\Exception $e) {
