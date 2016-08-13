@@ -108,7 +108,6 @@ ko.components.register('grid', {
         self.sortorder = ko.observable(0);
         self.groupby = ko.observable(params.groupby === undefined ? '':params.groupby);
         self.filters = ko.observableArray([]);
-        self.display = ko.observable(false);
         self.loading = ko.observable(false);
         self.is_fetch = false;
         self.pagemax = ko.pureComputed(function () {
@@ -236,7 +235,7 @@ ko.components.register('grid', {
         });
     },
     template: '\
-    <nav class="navbar navbar-default" data-bind="visible: display" style="display: none;">\
+    <nav class="navbar navbar-default">\
         <div class="container-fluid">\
             <div class="app-toolbar">\
                 <div class="pull-left">\
@@ -277,7 +276,7 @@ ko.components.register('grid', {
             </div>\
         </div>\
     </nav>\
-    <div class="table-header-fixed-top" id="app-grid" data-bind="visible: display" style="display: none;">\
+    <div class="table-header-fixed-top" id="app-grid" >\
         <table class="table table-header">\
             <thead>\
                 <tr>\
