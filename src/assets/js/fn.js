@@ -1,5 +1,17 @@
+Number.prototype.formatMoney = function (c, d, t, unit) {
+    var n = this,
+            c = isNaN(c = Math.abs(c)) ? 0 : c,
+            d = d == undefined ? "." : d,
+            t = t == undefined ? "," : t,
+            s = n < 0 ? "-" : "",
+            i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + "",
+            j = (j = i.length) > 3 ? j % 3 : 0,
+            unit = unit == undefined ? "VNĐ" : unit;
+    return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "") + ' ' + unit;
+};
+
 function formValidate(id) {
-    var validate = $('#'+id).validate({
+    var validate = $('#' + id).validate({
         highlight: function (element) {
             $(element).closest('.form-group').addClass('has-error');
         },
@@ -19,10 +31,10 @@ function formValidate(id) {
     return validate;
 }
 function formReset(id) {
-    if($('#'+id).length > 0){
-        $('#'+id)[0].reset();
-        $('#'+id+' .form-group').removeClass('has-error');
-        $( "#"+id ).validate().resetForm();
+    if ($('#' + id).length > 0) {
+        $('#' + id)[0].reset();
+        $('#' + id + ' .form-group').removeClass('has-error');
+        $("#" + id).validate().resetForm();
     }
 }
 function showAppLoading() {
@@ -31,37 +43,57 @@ function showAppLoading() {
 function hideAppLoading() {
     $('.app-loading').removeClass('open');
 }
-function tableRefesh(selecttor){
+function tableRefesh(selecttor) {
     var arr = [];
-    $(selecttor + ' .table-content thead tr:first-child th').each(function(index, value){
+    $(selecttor + ' .table-content thead tr:first-child th').each(function (index, value) {
         arr.push($(this).width());
     });
     arr.pop();
-    $(selecttor + ' .table-header thead tr:first-child th').each(function(index, value){
+    $(selecttor + ' .table-header thead tr:first-child th').each(function (index, value) {
         $(this).width(arr[index]);
     });
 }
 
+function dropdown(element, sel) {
+    if ($('#' + element).hasClass('open'))
+        $('#' + element).removeClass('open');
+    else
+        $('#' + element).addClass('open');
+}
+
+function printDiv(id, callback) {
+    var divToPrint = document.getElementById(id);
+    var newWin = window.open('', 'Print-Window');
+    var html = divToPrint.innerHTML;
+    newWin.document.open();
+    newWin.document.write('<html><body onload="window.print()">' + html + '</body></html>');
+    newWin.document.close();
+    setTimeout(function () {
+        newWin.close();
+        callback();
+    }, 3);
+}
+
 // ko components register
 ko.components.register('form-signin', {
-    viewModel: function(params) {
+    viewModel: function (params) {
         var self = this;
         self.params = params;
         self.notify = ko.observable('');
-        
-        self.signin = function(){
+
+        self.signin = function () {
             $('#form-signin .btn').prop("disabled", true);
-            $.post( "login", $('#form-signin').serialize()).done(function( data ){
+            $.post("login", $('#form-signin').serialize()).done(function (data) {
                 $('#form-signin .btn').prop("disabled", false);
-                if(data.status === 'success'){
+                if (data.status === 'success') {
                     window.location.reload();
-                }else{
-                    self.notify('<div class="alert alert-danger" role="alert">'+data.message+'</div>');
+                } else {
+                    self.notify('<div class="alert alert-danger" role="alert">' + data.message + '</div>');
                 }
             });
             return false;
         };
-        $('#form-signin .form-control').on('keyup', function(){
+        $('#form-signin .form-control').on('keyup', function () {
             self.notify('');
         });
     },
@@ -87,14 +119,19 @@ ko.components.register('form-signin', {
 });
 
 ko.components.register('grid', {
-    viewModel: function(params){
+    viewModel: function (params) {
         var self = this;
+        self.params = params;
         self.token = params.token;
         self.url = params.url;
-        self.labels = $.map(params.cols, function(val, key) { return val; });
+        self.labels = $.map(params.cols, function (val, key) {
+            return val;
+        });
         self.trans = params.trans;
         self.buttons = params.buttons;
-        self.cols = $.map(params.cols, function(val, key) { return key; });
+        self.cols = $.map(params.cols, function (val, key) {
+            return key;
+        });
         self.data_empty_label = params.data_empty_label;
         self.sizes = [25, 50, 100, 200, 500];
         self.total = ko.observable(0);
@@ -106,7 +143,7 @@ ko.components.register('grid', {
         self.sorts = params.sorts;
         self.sortdatafield = ko.observable('');
         self.sortorder = ko.observable(0);
-        self.groupby = ko.observable(params.groupby === undefined ? '':params.groupby);
+        self.groupby = ko.observable(params.groupby === undefined ? '' : params.groupby);
         self.filters = ko.observableArray([]);
         self.loading = ko.observable(false);
         self.is_fetch = false;
@@ -114,7 +151,7 @@ ko.components.register('grid', {
             return Math.max(Math.ceil(self.total() / self.pagesize()), 1);
         });
         self.setSize = function (data) {
-            if (self.pagesize() !== data){
+            if (self.pagesize() !== data) {
                 self.pagenum(1);
                 self.pagesize(data);
             }
@@ -135,25 +172,27 @@ ko.components.register('grid', {
             $('#cfmDel').modal('show');
         };
         self.sort = function (column) {
-            if(column !== self.sortdatafield()){
+            if (column !== self.sortdatafield()) {
                 self.sortdatafield(column);
                 // self.sortorder(1);
-            }else{
+            } else {
                 var sort = self.sortorder() + 1;
-                if(sort > 1) sort = -1;
+                if (sort > 1)
+                    sort = -1;
                 self.sortorder(sort);
             }
         };
         self.toogleAll = function () {
-            if(self.checkAll()) self.ids([]);
-            else{
-                if(self.groupby() === ''){
+            if (self.checkAll())
+                self.ids([]);
+            else {
+                if (self.groupby() === '') {
                     var t = [];
                     ko.utils.arrayForEach(self.rows(), function (item) {
                         t.push(item.id);
                     });
                     self.ids(t);
-                }else{
+                } else {
                     var t = [];
                     ko.utils.arrayForEach(self.rows(), function (group) {
                         ko.utils.arrayForEach(group.rows, function (item) {
@@ -165,34 +204,35 @@ ko.components.register('grid', {
             }
             return true;
         };
-        self.checkAll = ko.pureComputed(function(){
-            if(self.groupby() === '') {
+        self.checkAll = ko.pureComputed(function () {
+            if (self.groupby() === '') {
                 return (self.ids().length === self.rows().length);
-            }else{
+            } else {
                 var t = 0;
                 ko.utils.arrayForEach(self.rows(), function (item) {
-                    t+=item.total;
+                    t += item.total;
                 });
                 return self.ids().length === t;
             }
         }, self);
-        self.showLoading = function(){
+        self.showLoading = function () {
             self.loading(true);
         };
-        self.hideLoading = function(){
+        self.hideLoading = function () {
             self.loading(false);
         };
-        self.doSearch = function(id){
-            if(self.is_fetch) return true;
-            self.search($('#'+id).val());
+        self.doSearch = function (id) {
+            if (self.is_fetch)
+                return true;
+            self.search($('#' + id).val());
         };
-        self.clearSearch = function(id){
-            $('#'+id).val('');
+        self.clearSearch = function (id) {
+            $('#' + id).val('');
             self.search('');
         };
-        self.fetch = function(){
+        self.fetch = function () {
             self.is_fetch = true;
-            $.ajax({url: self.url, type: "post", data: { _token: self.token, pagenum: self.pagenum, pagesize: self.pagesize, search: self.search, sort: self.sortdatafield, order: self.sortorder, groupby: self.groupby, filters: self.filters},
+            $.ajax({url: self.url, type: "post", data: {_token: self.token, pagenum: self.pagenum, pagesize: self.pagesize, search: self.search, sort: self.sortdatafield, order: self.sortorder, groupby: self.groupby, filters: self.filters},
                 beforeSend: self.showLoading, complete: self.hideLoading,
                 success: function (data) {
                     self.rows(data.rows);
@@ -202,35 +242,39 @@ ko.components.register('grid', {
                 }
             });
         };
-        self.add = function(){
-            if(params.add !== undefined) params.add();
+        self.add = function () {
+            if (params.add !== undefined)
+                params.add();
         };
-        self.edit = function(e){
-            if(params.edit !== undefined) params.edit(e);
+        self.edit = function (e) {
+            if (params.edit !== undefined)
+                params.edit(e);
         };
-        self.ref = function(){
-            if(self.is_fetch) return true;
+        self.ref = function () {
+            if (self.is_fetch)
+                return true;
             self.fetch();
         };
-        self.doDel = function(){
+        self.doDel = function () {
             $.ajax({url: self.url + '/delete', type: "post", data: {_token: self.token, ids: JSON.stringify(self.ids())},
                 beforeSend: showAppLoading, complete: hideAppLoading,
                 success: function (data) {
                     toastr[data.status](data.message);
-                    if(data.status === 'success'){
+                    if (data.status === 'success') {
                         self.ids([]);
                         self.fetch();
                     }
                 }
             });
         };
-        if(params.callback !== undefined) params.callback(self);
-        
+        if (params.callback !== undefined)
+            params.callback(self);
+
         ko.computed(self.fetch);
-        
-        $( "#app-grid .wrap-scroll").css('height', $(window).height() - 135);
-        $( window ).resize(function() {
-            $( "#app-grid .wrap-scroll").css('height', $(window).height() - 135);
+
+        $("#app-grid .wrap-scroll").css('height', $(window).height() - 135);
+        $(window).resize(function () {
+            $("#app-grid .wrap-scroll").css('height', $(window).height() - 135);
             tableRefesh('#app-grid');
         });
     },
@@ -244,7 +288,9 @@ ko.components.register('grid', {
                             <button data-bind="click: add" type="button" class="btn btn-default" ><span class="glyphicon glyphicon-plus"></span> <span data-bind="html: trans.add"></span></button>\
                         <!--/ko-->\
                         <button data-bind="click: ref, attr:{title: trans.refresh}" type="button" class="btn btn-default" data-toggle="tooltip"><span class="glyphicon glyphicon-refresh"></span></button>\
+                        <!-- ko if: buttons.indexOf("delete") !== -1 -->\
                         <button data-bind="click: del, enable: ids().length>0, attr:{title: trans.delete}" type="button" class="btn btn-default" data-toggle="tooltip"><span class="glyphicon glyphicon-trash"></span></button>\
+                        <!--/ko-->\
                         <div class="btn-group">\
                             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">\
                                 <span data-bind="text: pagesize"></span>\
@@ -258,6 +304,9 @@ ko.components.register('grid', {
                                 <!--/ko-->\
                             </ul>\
                         </div>\
+                        <!-- ko if: params.leftToolbar !== undefined -->\
+                            <div class="pull-left" data-bind="template: {name: params.leftToolbar }"></div>\
+                        <!-- /ko -->\
                     </div>\
                 </div>\
                 <div class="pull-right">\
@@ -328,7 +377,12 @@ ko.components.register('grid', {
                                <!--/ko-->\
                                <td class="text-right actions">\
                                     <!-- ko if: $parent.buttons.indexOf("edit") !== -1 -->\
-                                        <button class="btn btn-default btn-sm" data-bind="click: $parent.edit"><span class="glyphicon glyphicon-edit"></span></button>\
+                                        <!-- ko if: $parent.params.editToolbar !== undefined -->\
+                                            <div data-bind="template: {name: $parent.params.editToolbar }"></div>\
+                                        <!-- /ko -->\
+                                        <!-- ko if: $parent.params.editToolbar === undefined -->\
+                                            <button class="btn btn-default btn-sm" data-bind="click: $parent.edit"><span class="glyphicon glyphicon-edit"></span></button>\
+                                        <!-- /ko -->\
                                     <!--/ko-->\
                                 </td>\
                             </tr>\
@@ -356,7 +410,12 @@ ko.components.register('grid', {
                                        <!--/ko-->\
                                         <td class="text-right actions">\
                                             <!-- ko if: $parents[1].buttons.indexOf("edit") !== -1 -->\
-                                                <button class="btn btn-default btn-sm" data-bind="click: $parents[1].edit"><span class="glyphicon glyphicon-edit"></span></button>\
+                                                <!-- ko if: $parents[1].params.editToolbar !== undefined -->\
+                                                    <div data-bind="template: {name: $parents[1].params.editToolbar }"></div>\
+                                                <!-- /ko -->\
+                                                <!-- ko if: $parents[1].params.editToolbar === undefined -->\
+                                                    <button class="btn btn-default btn-sm" data-bind="click: $parents[1].edit"><span class="glyphicon glyphicon-edit"></span></button>\
+                                                <!-- /ko -->\
                                             <!--/ko-->\
                                         </td>\
                                     </tr>\
@@ -371,6 +430,7 @@ ko.components.register('grid', {
            </table>\
         </div>\
     </div>\
+    <!-- ko if: buttons.indexOf("delete") !== -1 -->\
     <!--cfmDel-->\
     <div class="modal" id="cfmDel" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="cfmDel" aria-hidden="true">\
         <div class="modal-dialog">\
@@ -382,5 +442,76 @@ ko.components.register('grid', {
                 </div>\
             </div>\
         </div>\
-    </div>'
+    </div>\
+    <!-- /ko -->'
+});
+
+ko.components.register('edit-form', {
+    viewModel: function (params) {
+        var self = this;
+        self.params = params;
+        if (params.buttons === undefined)
+            self.params.buttons = [];
+        self.current = ko.observable({});
+        self.method = ko.observable('add');
+
+        self.save = function () {
+            if (!$('#frm-edit').valid())
+                return false;
+            if (params.prepare_save !== undefined)
+                params.prepare_save();
+            self.current()._token = params.token;
+            $.ajax({url: params.url + '/' + self.method(), type: "post", data: self.current(),
+                beforeSend: showAppLoading, complete: hideAppLoading,
+                success: function (data) {
+                    toastr[data.status](data.message);
+                    if (data.status == 'success') {
+                        self.back();
+                        if (self.params.saved !== undefined)
+                            self.params.saved();
+                    }
+                }
+            });
+        };
+
+        self.back = function () {
+            self.current({});
+            params.back();
+        };
+
+        self.reset = function () {
+            self.current({});
+        };
+
+        self.form_rendered = function () {
+            if (params.callback !== undefined)
+                params.callback(self);
+        };
+
+    },
+    template: '\
+        <nav class="navbar navbar-default">\
+            <div class="container-fluid">\
+                <div class="app-toolbar">\
+                    <div class="pull-left">\
+                        <button data-bind="click: back" type="button" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Quay lại</button>\
+                    </div>\
+                    <!-- ko if: params.leftToolbar !== undefined -->\
+                        <div class="pull-left" data-bind="template: {name: params.leftToolbar }"></div>\
+                    <!-- /ko -->\
+                    <!-- ko if: params.rightToolbar !== undefined -->\
+                        <div class="pull-right" data-bind="template: {name: params.rightToolbar }"></div>\
+                    <!-- /ko -->\
+                    <!-- ko if: method()===\'add\' && params.buttons.indexOf(\'add\') >= 0 || method()===\'update\' && params.buttons.indexOf(\'edit\') >= 0-->\
+                    <div class="pull-right">\
+                        <button data-bind="click: reset" type="button" class="btn btn-default"><span class="glyphicon glyphicon-refresh"></span> Huỷ</button>\
+                        <button data-bind="click: save" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Lưu</button>\
+                    </div>\
+                    <!-- /ko -->\
+                </div>\
+            </div>\
+        </nav>\
+        <form id="frm-edit" style="padding: 15px;">\
+            <div data-bind="template: {name: params.template, afterRender: form_rendered }"></div>\
+        </form>'
 });
