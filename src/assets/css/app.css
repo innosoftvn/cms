@@ -443,9 +443,16 @@ a { cursor: pointer; }
 }
 .table-header-fixed-top .actions{
     padding: 3px 15px 3px 3px !important;
+    width: 85px;
 }
 .table-header-fixed-top .actions .btn{
     padding: 2px 20px;
+}
+.table-header-fixed-top table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
 }
 #search-wrap {
     position: relative;

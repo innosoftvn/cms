@@ -372,7 +372,12 @@ ko.components.register('grid', {
                                 </td>\
                                <!--ko foreach: $parent.cols-->\
                                <td>\
-                                   <span data-bind="html: row[$data]"></span>\
+                                    <!-- ko if: $parents[1].params.cellsrenderer[$data] === undefined -->\
+                                    <span data-bind="html: row[$data]"></span>\
+                                    <!-- /ko -->\
+                                    <!-- ko if: $parents[1].params.cellsrenderer[$data] !== undefined -->\
+                                    <span data-bind="html: $parents[1].params.cellsrenderer[$data](row[$data])"></span>\
+                                    <!-- /ko -->\
                                </td>\
                                <!--/ko-->\
                                <td class="text-right actions">\
@@ -404,7 +409,12 @@ ko.components.register('grid', {
                                        <!--ko foreach: $parents[1].cols-->\
                                             <!--ko if: $parents[2].cols[$index()] !== $parents[2].groupby() -->\
                                                 <td>\
+                                                    <!-- ko if: $parents[2].params.cellsrenderer[$data] === undefined -->\
                                                     <span data-bind="html: row_group[$data]"></span>\
+                                                    <!-- /ko -->\
+                                                    <!-- ko if: $parents[2].params.cellsrenderer[$data] !== undefined -->\
+                                                    <span data-bind="html: $parents[2].params.cellsrenderer[$data](row_group[$data])"></span>\
+                                                    <!-- /ko -->\
                                                 </td>\
                                             <!--/ko-->\
                                        <!--/ko-->\
