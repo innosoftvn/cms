@@ -496,6 +496,7 @@ ko.components.register('edit-form', {
         self.form_rendered = function () {
             if (params.callback !== undefined)
                 params.callback(self);
+            formValidate('frm-edit');
         };
 
     },
