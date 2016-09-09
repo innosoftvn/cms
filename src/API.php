@@ -49,7 +49,7 @@ class API extends Controller
                 {
                     $search = \Request::get('search');
                     foreach ($cols as $col){
-                        $query->orWhere($col, 'like', '%'.$search.'%');
+                        $query->orWhere($col, 'like', '%'.str_slug($search, ' ').'%');
                     }
                 });
             }else{
@@ -63,7 +63,7 @@ class API extends Controller
                 {
                     $search = \Request::get('search');
                     foreach ($cols as $col){
-                        $query->orWhere($col, 'like', '%'.$search.'%');
+                        $query->orWhere($col, 'like', '%'.str_slug($search, ' ').'%');
                     }
                 });
             }
