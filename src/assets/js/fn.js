@@ -232,7 +232,7 @@ ko.components.register('grid', {
         };
         self.fetch = function () {
             self.is_fetch = true;
-            $.ajax({url: self.url, type: "post", data: {_token: self.token, pagenum: self.pagenum, pagesize: self.pagesize, search: self.search, sort: self.sortdatafield, order: self.sortorder, groupby: self.groupby, filters: self.filters},
+            $.ajax({url: self.url, type: "post", data: {_token: self.token, pagenum: self.pagenum, pagesize: self.pagesize, search: self.search, sort: self.sortdatafield, order: self.sortorder, groupby: self.groupby, filters: self.filters()},
                 beforeSend: self.showLoading, complete: self.hideLoading,
                 success: function (data) {
                     self.rows(data.rows);
