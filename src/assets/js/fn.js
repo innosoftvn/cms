@@ -10,6 +10,58 @@ Number.prototype.formatMoney = function (c, d, t, unit) {
     return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "") + ' ' + unit;
 };
 
+String.prototype.str_pad = function (len, pad_string, pad_type) {
+    if(pad_string === 'undefined') pad_string = ' ';
+    if(pad_type === 'undefined') pad_type = 'STR_PAD_RIGHT';
+    var str = this + "";
+    switch(pad_type) {
+        case 'STR_PAD_RIGHT':
+            while (str.length < len) str = str + pad_string;
+            break;
+        case 'STR_PAD_LEFT':
+            while (str.length < len) str = pad_string + str;
+            break;
+        case 'STR_PAD_BOTH':
+            while (str.length < len){
+                str = str + pad_string;
+                if(str.length < len) str = pad_string + str;
+            }
+            break;
+    }
+    return str;
+};
+
+String.prototype.strtotime = function (str) {
+    var date = new Date(this);
+    var len = str.length;
+    var result = '';
+    for (var i = 0; i < len; i++) {
+        switch(str[i]) {
+            case 'Y':
+                result += date.getFullYear();
+                break;
+            case 'm':
+                result += String (date.getMonth() + 1).str_pad(2, '0', 'STR_PAD_LEFT');
+                break;
+            case 'd':
+                result += String (date.getDate()).str_pad(2, '0', 'STR_PAD_LEFT');
+                break;
+            case 'H':
+                result += String (date.getHours()).str_pad(2, '0', 'STR_PAD_LEFT');
+                break;
+            case 'i':
+                result += String (date.getMinutes()).str_pad(2, '0', 'STR_PAD_LEFT');
+                break;
+            case 's':
+                result += String (date.getSeconds()).str_pad(2, '0', 'STR_PAD_LEFT');
+                break;
+            default:
+                result += str[i];
+        };
+    }
+    return result;
+};
+
 function formValidate(id) {
     var validate = $('#' + id).validate({
         highlight: function (element) {
