@@ -282,6 +282,10 @@ ko.components.register('grid', {
             $('#' + id).val('');
             self.search('');
         };
+        
+        self.groupby.subscribe(function(previousValue){
+            self.rows([]);
+        }, self, "beforeChange");
         self.fetch = function () {
             self.is_fetch = true;
             $.ajax({url: self.url, type: "post", data: {_token: self.token, pagenum: self.pagenum, pagesize: self.pagesize, search: self.search, sort: self.sortdatafield, order: self.sortorder, groupby: self.groupby, filters: self.filters()},
@@ -428,7 +432,7 @@ ko.components.register('grid', {
                                     <span data-bind="html: row[$data]"></span>\
                                     <!-- /ko -->\
                                     <!-- ko if: $parents[1].params.cellsrenderer[$data] !== undefined -->\
-                                    <span data-bind="html: $parents[1].params.cellsrenderer[$data](row[$data])"></span>\
+                                    <span data-bind="html: $parents[1].params.cellsrenderer[$data](row)"></span>\
                                     <!-- /ko -->\
                                </td>\
                                <!--/ko-->\
@@ -449,8 +453,13 @@ ko.components.register('grid', {
                         <!--ko foreach: {data: rows, as: \'row\'}-->\
                             <!--ko if: row.rows!==undefined-->\
                                 <tr class="group-header">\
-                                    <td data-bind="attr:{colspan: $parent.cols.length + 1}">\
+                                    <td data-bind="attr:{colspan: $parent.cols.length + ($parent.cols.indexOf($parent.groupby()) < 0 ? 2:1) }">\
+                                        <!-- ko if: $parent.params.cellsrenderer[$parent.groupby()] === undefined -->\
                                         <span data-bind="html: row[$parent.groupby()]"></span> <span data-bind="html: row.total" class="label label-default"></span>\
+                                        <!-- /ko -->\
+                                        <!-- ko if: $parent.params.cellsrenderer[$parent.groupby()] !== undefined -->\
+                                        <div data-bind="html: $parent.params.cellsrenderer[$parent.groupby()](row)"></div>\
+                                        <!-- /ko -->\
                                     </td>\
                                 </tr>\
                                 <!--ko foreach: {data: row.rows, as: \'row_group\'}-->\
@@ -465,7 +474,7 @@ ko.components.register('grid', {
                                                     <span data-bind="html: row_group[$data]"></span>\
                                                     <!-- /ko -->\
                                                     <!-- ko if: $parents[2].params.cellsrenderer[$data] !== undefined -->\
-                                                    <span data-bind="html: $parents[2].params.cellsrenderer[$data](row_group[$data])"></span>\
+                                                    <span data-bind="html: $parents[2].params.cellsrenderer[$data](row_group)"></span>\
                                                     <!-- /ko -->\
                                                 </td>\
                                             <!--/ko-->\

@@ -69,13 +69,17 @@ class API extends Controller
             }
         }
         if(\Request::has('filters')){
-            $query->where(function($query)
-            {
-                $filters = \Request::get('filters');
-                foreach ($filters as $filter){
-                    $query->orWhere($filter['key'], '=', $filter['value']);
-                }
-            });
+            $filters = \Request::get('filters');
+            foreach ($filters as $filter){
+                if(isset($filter['operator'])){
+                    if(is_array($filter['operator'])){
+                        $len = count($filter['operator']);
+                        for($i=0; $i<$len; $i++){
+                            $query->where($filter['key'], $filter['operator'][$i], $filter['value'][$i]);
+                        }
+                    }else $query->where($filter['key'], $filter['operator'], $filter['value']);
+                }else $query->whereIn($filter['key'], $filter['value']);
+            }
         }
         if(\Request::has('sort')){
             $query->orderBy(\Request::get('sort'), \Request::get('order')==1 ? 'asc':'desc');
