@@ -185,12 +185,12 @@ ko.components.register('grid', {
             return key;
         });
         self.data_empty_label = params.data_empty_label;
-        self.sizes = [25, 50, 100, 200, 500];
+        self.sizes = [5, 10, 25, 50, 100, 200, 500];
         self.total = ko.observable(0);
         self.rows = ko.observableArray([]);
         self.ids = ko.observableArray([]);
-        self.pagenum = ko.observable(1);
-        self.pagesize = ko.observable(25);
+        self.pagenum = 1;
+        self.pagesize = 25;
         self.search = ko.observable('');
         self.sorts = params.sorts;
         self.sortdatafield = ko.observable('');
@@ -200,25 +200,40 @@ ko.components.register('grid', {
         self.loading = ko.observable(false);
         self.is_fetch = false;
         self.pagemax = ko.pureComputed(function () {
-            return Math.max(Math.ceil(self.total() / self.pagesize()), 1);
+            return Math.max(Math.ceil(self.total() / self.pagesize), 1);
         });
+        self.computed_pagenum = ko.observable(self.pagenum);
+        self.computed_pagesize = ko.observable(self.pagesize);
+        
+        self.setPageNum = function(num){
+            self.pagenum = num;
+            self.computed_pagenum(num);
+        };
+        self.setPageSize = function(size){
+            self.pagesize = size;
+            self.computed_pagesize(size);
+        };
+        
         self.setSize = function (data) {
-            if (self.pagesize() !== data) {
-                self.pagenum(1);
-                self.pagesize(data);
+            if (self.pagesize !== data) {
+                self.setPageNum(1);
+                self.setPageSize(data);
+                self.fetch();
             }
         };
         self.start = ko.pureComputed(function () {
-            return self.pagesize() * (self.pagenum() - 1) + 1;
+            return self.computed_pagesize() * (self.computed_pagenum() - 1) + 1;
         });
         self.end = ko.pureComputed(function () {
-            return Math.min(self.pagesize() * self.pagenum(), self.total());
+            return Math.min(self.computed_pagesize() * self.computed_pagenum(), self.total());
         });
         self.next = function () {
-            self.pagenum(self.pagenum() + 1);
+            self.setPageNum(self.pagenum + 1);
+            self.fetch();
         };
         self.prev = function () {
-            self.pagenum(self.pagenum() - 1);
+            self.setPageNum(self.pagenum - 1);
+            self.fetch();
         };
         self.del = function () {
             $('#cfmDel').modal('show');
@@ -283,9 +298,17 @@ ko.components.register('grid', {
             self.search('');
         };
         
-        self.groupby.subscribe(function(previousValue){
+        self.search.subscribe(function(oldValue){
+            self.setPageNum(1);
+        }, self, "beforeChange");
+        self.filters.subscribe(function(oldValue){
+            self.setPageNum(1);
+        }, self, "beforeChange");
+        self.groupby.subscribe(function(oldValue){
+            self.setPageNum(1);
             self.rows([]);
         }, self, "beforeChange");
+        
         self.fetch = function () {
             self.is_fetch = true;
             $.ajax({url: self.url, type: "post", data: {_token: self.token, pagenum: self.pagenum, pagesize: self.pagesize, search: self.search, sort: self.sortdatafield, order: self.sortorder, groupby: self.groupby, filters: self.filters()},
@@ -349,13 +372,13 @@ ko.components.register('grid', {
                         <!--/ko-->\
                         <div class="btn-group">\
                             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">\
-                                <span data-bind="text: pagesize"></span>\
+                                <span data-bind="text: computed_pagesize"></span>\
                                 <span class="caret"></span>\
                             </button>\
                             <ul class="dropdown-menu">\
                                 <!--ko foreach: sizes-->\
                                     <!-- ko if: $parent.sizes[$index() -1 ] <= $parent.total() || $index()==0 -->\
-                                    <li data-bind="click: $parent.setSize"><a data-bind="text: $data"></a></li>\
+                                    <li data-bind="click: $parent.setSize, attr: {class: $parent.computed_pagesize() === $data ? \'active\':\'\'}"><a data-bind="text: $data"></a></li>\
                                     <!--/ko-->\
                                 <!--/ko-->\
                             </ul>\
@@ -369,8 +392,8 @@ ko.components.register('grid', {
                     <div class="pagination" data-bind="visible: total() > 0">\
                         <span><b data-bind="html: start"></b>-<b data-bind="html: end"></b> <span data-bind="html: trans.pagination_of_total"></span> <b data-bind="html: total"></b></span>\
                         <div class="btn-group" role="group">\
-                            <button type="button" class="btn btn-default" data-bind="click: prev, enable: pagenum()>1"><span class="glyphicon glyphicon-chevron-left"></span></button>\
-                            <button type="button" class="btn btn-default" data-bind="click: next, enable: pagenum()<pagemax()"><span class="glyphicon glyphicon-chevron-right"></span></button>\
+                            <button type="button" class="btn btn-default" data-bind="click: prev, enable: computed_pagenum()>1"><span class="glyphicon glyphicon-chevron-left"></span></button>\
+                            <button type="button" class="btn btn-default" data-bind="click: next, enable: computed_pagenum()<pagemax()"><span class="glyphicon glyphicon-chevron-right"></span></button>\
                         </div>\
                     </div>\
                     <div id="search-wrap">\
