@@ -449,10 +449,11 @@ a { cursor: pointer; }
     padding: 2px 20px;
 }
 .table-header-fixed-top table td {
-    white-space: nowrap;
+/*    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: ellipsis;*/
     max-width: 150px;
+    min-width: 50px;
 }
 #search-wrap {
     position: relative;
@@ -703,4 +704,13 @@ legend{
 }
 .grid-filter-container.open > .grid-filter-btn{
     background-color: #d4d4d4;
+}
+
+.table-info > tbody > tr > td:first-child{
+    background-color: #fafafa;
+    font-weight: 700;
+}
+
+.tooltip {
+    min-width: 80px;
 }

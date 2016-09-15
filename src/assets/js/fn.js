@@ -368,8 +368,20 @@ ko.components.register('grid', {
                         <!--/ko-->\
                         <button data-bind="click: ref, attr:{title: trans.refresh}" type="button" class="btn btn-default" data-toggle="tooltip"><span class="glyphicon glyphicon-refresh"></span></button>\
                         <!-- ko if: buttons.indexOf("delete") !== -1 -->\
-                        <button data-bind="click: del, enable: ids().length>0, attr:{title: trans.delete}" type="button" class="btn btn-default" data-toggle="tooltip"><span class="glyphicon glyphicon-trash"></span></button>\
+                        <button data-bind="click: del, visible: ids().length>0, attr:{title: trans.delete}" type="button" class="btn btn-danger" data-toggle="tooltip"><span class="glyphicon glyphicon-trash"></span></button>\
                         <!--/ko-->\
+                        <!-- ko if: params.leftToolbar !== undefined -->\
+                            <div class="pull-left" data-bind="template: {name: params.leftToolbar }"></div>\
+                        <!-- /ko -->\
+                    </div>\
+                </div>\
+                <div class="pull-right">\
+                    <div class="pagination" data-bind="visible: total() > 0">\
+                        <span><b data-bind="html: start"></b>-<b data-bind="html: end"></b> <span data-bind="html: trans.pagination_of_total"></span> <b data-bind="html: total"></b></span>\
+                        <div class="btn-group" role="group">\
+                            <button type="button" class="btn btn-default" data-bind="click: prev, enable: computed_pagenum()>1"><span class="glyphicon glyphicon-chevron-left"></span></button>\
+                            <button type="button" class="btn btn-default" data-bind="click: next, enable: computed_pagenum()<pagemax()"><span class="glyphicon glyphicon-chevron-right"></span></button>\
+                        </div>\
                         <div class="btn-group">\
                             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">\
                                 <span data-bind="text: computed_pagesize"></span>\
@@ -382,18 +394,6 @@ ko.components.register('grid', {
                                     <!--/ko-->\
                                 <!--/ko-->\
                             </ul>\
-                        </div>\
-                        <!-- ko if: params.leftToolbar !== undefined -->\
-                            <div class="pull-left" data-bind="template: {name: params.leftToolbar }"></div>\
-                        <!-- /ko -->\
-                    </div>\
-                </div>\
-                <div class="pull-right">\
-                    <div class="pagination" data-bind="visible: total() > 0">\
-                        <span><b data-bind="html: start"></b>-<b data-bind="html: end"></b> <span data-bind="html: trans.pagination_of_total"></span> <b data-bind="html: total"></b></span>\
-                        <div class="btn-group" role="group">\
-                            <button type="button" class="btn btn-default" data-bind="click: prev, enable: computed_pagenum()>1"><span class="glyphicon glyphicon-chevron-left"></span></button>\
-                            <button type="button" class="btn btn-default" data-bind="click: next, enable: computed_pagenum()<pagemax()"><span class="glyphicon glyphicon-chevron-right"></span></button>\
                         </div>\
                     </div>\
                     <div id="search-wrap">\
@@ -578,6 +578,12 @@ ko.components.register('edit-form', {
         };
 
         self.form_rendered = function () {
+            if (jQuery().tooltip !== undefined)
+                $('[data-toggle="tooltip"]').tooltip({placement: 'bottom'});
+            if (jQuery().popover !== undefined)
+                $('[data-toggle="popover"]').popover({html: true});
+            
+            
             if (params.callback !== undefined)
                 params.callback(self);
             formValidate('frm-edit');
