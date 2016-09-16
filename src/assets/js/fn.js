@@ -33,6 +33,7 @@ String.prototype.str_pad = function (len, pad_string, pad_type) {
 
 String.prototype.strtotime = function (str) {
     var date = new Date(this);
+    if(date.toString() === 'Invalid Date') return this;
     var len = str.length;
     var result = '';
     for (var i = 0; i < len; i++) {
@@ -376,13 +377,13 @@ ko.components.register('grid', {
                     </div>\
                 </div>\
                 <div class="pull-right">\
-                    <div class="pagination" data-bind="visible: total() > 0">\
+                    <div class="pagination" style="float:left;" data-bind="visible: total() > 0">\
                         <span><b data-bind="html: start"></b>-<b data-bind="html: end"></b> <span data-bind="html: trans.pagination_of_total"></span> <b data-bind="html: total"></b></span>\
                         <div class="btn-group" role="group">\
                             <button type="button" class="btn btn-default" data-bind="click: prev, enable: computed_pagenum()>1"><span class="glyphicon glyphicon-chevron-left"></span></button>\
                             <button type="button" class="btn btn-default" data-bind="click: next, enable: computed_pagenum()<pagemax()"><span class="glyphicon glyphicon-chevron-right"></span></button>\
                         </div>\
-                        <div class="btn-group">\
+                        <div class="btn-group" style="margin-right: 5px;">\
                             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">\
                                 <span data-bind="text: computed_pagesize"></span>\
                                 <span class="caret"></span>\
@@ -396,7 +397,7 @@ ko.components.register('grid', {
                             </ul>\
                         </div>\
                     </div>\
-                    <div id="search-wrap">\
+                    <div id="search-wrap" style="float:right;">\
                         <input type="text" class="form-control" id="search-warehouse" data-bind="attr: {placeholder: trans.search}, event: {keyup: doSearch.bind($data, \'search-warehouse\')} ">\
                         <i id="search-clear" class="glyphicon glyphicon-remove" data-bind="click: clearSearch.bind($data, \'search-warehouse\'), attr: {\'data-toggle\': search()!=\'\'}"></i>\
                     </div>\
