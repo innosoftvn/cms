@@ -23,13 +23,9 @@ class CMSServiceProvider extends ServiceProvider
 //            __DIR__.'/views/404.blade.php' => resource_path('views/errors/404.blade.php'),
 //            
             // public
-//            __DIR__.'/assets/css' => resource_path('assets/css'),
-//            __DIR__.'/assets/js' => resource_path('assets/js'),
-            __DIR__.'/assets/js/app-init.min.js' => public_path('assets/js/app-init.min.js'),
-            __DIR__.'/assets/app.js' => public_path('assets/js/app.js'),
-            __DIR__.'/assets/app.css' => public_path('assets/css/app.css'),
-            __DIR__.'/assets/fonts' => public_path('assets/fonts'),
-            __DIR__.'/assets/images' => public_path('assets/images'),
+//            __DIR__.'/assets/src/css' => resource_path('assets/css'),
+//            __DIR__.'/assets/src/js' => resource_path('assets/js'),
+            __DIR__.'/assets/dist' => public_path('assets'),
 //            
 //            // config
 //            __DIR__.'/cms.php' => config_path('cms.php'),
