@@ -5,16 +5,12 @@
 @endsection
 
 @section('assets')
-<link rel="stylesheet" href="{{ url('assets/cms/css/app.min.css') }}">
-<script src="{{ url('assets/cms/js/jquery.min.js') }}"></script>
-<script src="{{ url('assets/cms/js/knockout.js') }}"></script>
-<script src="{{ url('assets/cms/js/fn.min.js') }}"></script>
 <style>
     body {
         padding-top: 100px;
         padding-bottom: 40px;
         background-color: #dbdddd;
-        background-image: url("{!! url('assets/cms/images/base-bg.png') !!}");
+        background-image: url("{!! url('assets/images/base-bg.png') !!}");
     }
 </style>
 @endsection
@@ -24,7 +20,7 @@
     name: 'form-signin',
     params: {
         token: '{!! csrf_token() !!}',
-        logo: '{!! url('assets/cms/images/logo.png') !!}',
+        logo: '{!! url('assets/images/logo.png') !!}',
         type: 'danger',
         labels: {
             username: '{!! trans("cms::auth.username") !!}',

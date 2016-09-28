@@ -18,6 +18,13 @@ class AuthController extends Controller
             
     function postLogin() 
     {
+        if(config('cms.recaptcha') != ''){
+            $recaptcha = new \ReCaptcha\ReCaptcha(config('cms.recaptcha'));
+            $resp      = $recaptcha->verify(\Request::get('responseCaptcha'), \Request::ip());
+            if (!$resp->isSuccess()) {
+                return ['status' => 'error', 'message' => $resp->getErrorCodes()];
+            }
+        }
         $rules = [
             'username' => 'required',
             'password' => 'required'

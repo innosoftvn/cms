@@ -7,22 +7,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ trans('app.'.uri()) }}</title>
 
-        <link rel="stylesheet" href="{{ url('assets/cms/css/bootstrap.min.css') }}">
-        <link rel="stylesheet" href="{{ url('assets/cms/css/nanoscroller.min.css') }}">
-        <link rel="stylesheet" href="{{ url('assets/cms/css/toastr.min.css') }}">
-        <link rel="stylesheet" href="{{ url('assets/cms/css/jquery.bootstrap-touchspin.min.css') }}">
-        <link rel="stylesheet" href="{{ url('assets/cms/css/app.min.css') }}">
-        
-        <script src="{{ url('assets/cms/js/jquery.min.js') }}"></script>
-        <script src="{{ url('assets/cms/js/bootstrap.min.js') }}"></script>
-        <script src="{{ url('assets/cms/js/knockout.js') }}"></script>
-        <script src="{{ url('assets/cms/js/knockout.mapping.js') }}"></script>
-        <script src="{{ url('assets/cms/js/jquery.validate.min.js') }}"></script>
-        <script src="{{ url('assets/cms/js/jquery.validate.vi.min.js') }}"></script>
-        <script src="{{ url('assets/cms/js/jquery.nanoscroller.min.js') }}"></script>
-        <script src="{{ url('assets/cms/js/toastr.min.js') }}"></script>
-        <script src="{{ url('assets/cms/js/jquery.bootstrap-touchspin.min.js') }}"></script>
-        <script src="{{ url('assets/cms/js/fn.min.js') }}"></script>
+        <link rel="stylesheet" href="{{ url('assets/css/app.css') }}">
+        <script src="{{ url('assets/js/app.js') }}"></script>
 
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -52,7 +38,7 @@
                 <i>{{ trans('cms::cms.loading') }}</i>
             </span>
         </div>
-        @include('cms::blocks.footer')
-        <script src="{{ url('assets/cms/js/app.min.js') }} "></script>
+        @yield('footer')
+        <script src="{{ url('assets/js/app-init.min.js') }} "></script>
     </body>
 </html>

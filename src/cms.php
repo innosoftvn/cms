@@ -5,6 +5,7 @@
  */
 
 return [
-    'backend_prefix' => 'admin'
+    'backend_prefix' => 'admin',
+    'backend_login' => 'cms::login'
 ];
 

@@ -5,13 +5,7 @@ return [
         '' => [
             'dashboard' => [
                 'icon' => 'glyphicon glyphicon-dashboard',
-                'ctrl' => '\InnoSoft\CMS\DashboardController'
-            ],
-        ],
-        'user' => [
-            'user' => [
-                'icon' => 'glyphicon glyphicons-beach-umbrella',
-                'ctrl' => '\InnoSoft\CMS\DashboardController'
+                'ctrl' => '\App\Http\Controllers\Admin\DashboardController'
             ],
         ],
     ]

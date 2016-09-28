@@ -17,7 +17,7 @@ class AdminAuthController extends AuthController
     public function getLogin()
     {
         if(\Auth::check() && \Auth::user()->login_backend) return redirect (config('cms.backend_prefix') . '/dashboard');
-        return view('cms::login');
+        return view(config('cms.backend_login'));
     }
     
     function getLogout()

@@ -16,17 +16,18 @@
                     <span></span>
                 </div>
             </a>
-            <img class="navbar-brand app-logo" src="{{ url('assets/cms/images/logo-small.png') }}">
+            <img class="navbar-brand app-logo" src="{{ url('assets/images/logo-small.png') }}">
             <a class="navbar-brand app-title" href="dashboard">{{ trans('app.title') }}</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="navbar-menu">
             <ul class="nav navbar-nav navbar-right">
+                @yield('quick-start-menu')
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-user"></span> {{ \App::make(config('auth.providers.users.model'))->get_info()->fullname }} <span class="caret"></span></a>
                     <ul class="dropdown-menu" role="menu">
-                        
+                        @yield('profile-menu')
                         <li class="divider"></li>
                         <li>
                             <a href="logout">

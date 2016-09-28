@@ -133,17 +133,45 @@ ko.components.register('form-signin', {
         var self = this;
         self.params = params;
         self.notify = ko.observable('');
+        self.expired = ko.observable(false);
+        
+        var widget;
 
         self.signin = function () {
-            $('#form-signin .btn').prop("disabled", true);
-            $.post("login", $('#form-signin').serialize()).done(function (data) {
-                $('#form-signin .btn').prop("disabled", false);
-                if (data.status === 'success') {
-                    window.location.reload();
-                } else {
-                    self.notify('<div class="alert alert-danger" role="alert">' + data.message + '</div>');
-                }
-            });
+            if(params.captcha === undefined){
+                $('#form-signin .btn').prop("disabled", true);
+                $.post("login", $('#form-signin').serialize()).done(function (data) {
+                    $('#form-signin .btn').prop("disabled", false);
+                    if (data.status === 'success') {
+                        window.location.reload();
+                    } else {
+                        self.notify('<div class="alert alert-danger" role="alert">' + data.message + '</div>');
+                    }
+                });
+            }else{
+                self.expired(true);
+                widget = grecaptcha.render(params.captcha.id, {
+                    sitekey: params.captcha.sitekey,
+                    theme: params.captcha.theme,
+                    type: params.captcha.type,
+                    size: params.captcha.size,
+                    tabindex: params.captcha.tabindex,
+                    'expired-callback': function() {
+                        self.expired(false);
+                    },
+                    callback: function() {
+                        $.post("login", $('#form-signin').serialize() + '&responseCaptcha=' + grecaptcha.getResponse(widget)).done(function (data) {
+                            $('#form-signin .btn').prop("disabled", false);
+                            if (data.status === 'success') {
+                                window.location.reload();
+                            } else {
+                                self.expired(false);
+                                self.notify('<div class="alert alert-danger" role="alert">' + data.message + '</div>');
+                            }
+                        });
+                    }
+                });
+            }
             return false;
         };
         $('#form-signin .form-control').on('keyup', function () {
@@ -157,14 +185,19 @@ ko.components.register('form-signin', {
                     <input type="hidden" name="_token" data-bind="value: params.token">\
                     <img data-bind="attr:{src: params.logo}" class="img-responsive" style="margin: 5px auto 20px auto;"/>\
                     <div data-bind="html: notify"></div>\
-                    <input type="text" id="username" name="username" class="form-control" data-bind="attr:{placeholder: params.labels.username}" required autofocus>\
-                    <input type="password" id="password" name="password" class="form-control" data-bind="attr:{placeholder: params.labels.password}" required>\
-                    <div class="checkbox">\
-                        <label>\
-                            <input type="checkbox" name="remember-me" value="true"> <span data-bind="html: params.labels.remember_me"></span>\
-                        </label>\
+                    <div data-bind="visible: !expired()">\
+                        <input type="text" id="username" name="username" class="form-control" data-bind="attr:{placeholder: params.labels.username}" required autofocus>\
+                        <input type="password" id="password" name="password" class="form-control" data-bind="attr:{placeholder: params.labels.password}" required>\
+                        <div class="checkbox">\
+                            <label>\
+                                <input type="checkbox" name="remember-me" value="true"> <span data-bind="html: params.labels.remember_me"></span>\
+                            </label>\
+                        </div>\
+                        <button data-bind="attr:{class: \'btn btn-lg btn-block btn-\' + params.type}, html: params.labels.login" type="submit"></button>\
                     </div>\
-                    <button data-bind="attr:{class: \'btn btn-lg btn-block btn-\' + params.type}, html: params.labels.login" type="submit"></button>\
+                    <div data-bind="if: expired()">\
+                        <div style="margin-top: 40px;" data-bind="css: params.captcha.class, attr: { id: params.captcha.id }"></div>\
+                    </div>\
                 </form>\
             </div>\
         </div>\
@@ -433,10 +466,10 @@ ko.components.register('grid', {
                         <!--ko foreach: {data: labels, as: \'labels\' }--> \
                             <!--ko if: $parent.groupby()===\'\' || $parent.cols[$index()] !== $parent.groupby() -->\
                                 <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) < 0 --> \
-                                    <th><span data-bind="html: $data"></span></th>\
+                                    <th data-bind="attr: {style: $parent.params.columnsresize!==undefined &&  $parent.params.columnsresize[$parent.cols[$index()]] !== undefined ? \'width:\'+$parent.params.columnsresize[$parent.cols[$index()]]+\'px;\':\'\'}"><span data-bind="html: $data"></span></th>\
                                 <!--/ko-->\
                                 <!--ko if: $parent.sorts.indexOf($parent.cols[$index()]) >= 0 --> \
-                                    <th class="sortdatafield" data-bind="click: $parent.sort.bind($data, $parent.cols[$index()])"><span data-bind="html: $data"></span> <span data-bind="attr: {class: $parent.sortdatafield() != $parent.cols[$index()] || $parent.sortorder()==0 ? \'sort\' : $parent.sortorder()==1 ? \'sortasc\' : \'sortdesc\'}"></span></th>\
+                                    <th data-bind="attr: {style: $parent.params.columnsresize!==undefined &&  $parent.params.columnsresize[$parent.cols[$index()]] !== undefined ? \'width:\'+$parent.params.columnsresize[$parent.cols[$index()]]+\'px;\':\'\'}" class="sortdatafield" data-bind="click: $parent.sort.bind($data, $parent.cols[$index()])"><span data-bind="html: $data"></span> <span data-bind="attr: {class: $parent.sortdatafield() != $parent.cols[$index()] || $parent.sortorder()==0 ? \'sort\' : $parent.sortorder()==1 ? \'sortasc\' : \'sortdesc\'}"></span></th>\
                                 <!--/ko-->\
                             <!--/ko-->\
                         <!--/ko-->\
