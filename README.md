@@ -24,12 +24,12 @@ Then add the following lines to the `config/app.php`:
 ```
 'providers' => [
     // ...
-    
+
     /*
      * InnoSoft Application Providers
      */
     InnoSoft\CMS\CMSServiceProvider::class,
-    
+
     // ...
 ],
 ```
@@ -62,7 +62,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::group([ 'prefix' => 'admin' ], function(){
         Route::any('{paths?}', "\InnoSoft\CMS\CMSController@route")->where('paths', '([A-Za-z0-9\-\/]+)');
     });
-    
+
     Route::get('/', function () {
         echo 'Frontend template not found - <a href="admin">Backend</a>';
     });
