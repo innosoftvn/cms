@@ -18,7 +18,7 @@ elixir(function(mix) {
         "nanoscroller.min.css",
         "toastr.min.css",
         "jquery.bootstrap-touchspin.min.css",
-        "bootstrap-select.min.css",
+        "bootstrap-select.css",
         "bootstrap-datetimepicker.min.css",
         "bootstrap-tagsinput.min.css",
         "jquery.gridster.min.css",
