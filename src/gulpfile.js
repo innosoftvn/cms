@@ -46,6 +46,7 @@ elixir(function(mix) {
         "canvasjs.min.js",
         "jquery.gridster.min.js",
         "jquery.nestable.min.js",
+        "jquery.hotkeys.min.js",
         "fn.min.js"
     ], 'public/assets/js/app.js');
 });

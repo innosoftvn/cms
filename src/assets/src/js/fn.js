@@ -322,13 +322,13 @@ ko.components.register('grid', {
         self.hideLoading = function () {
             self.loading(false);
         };
-        self.doSearch = function (id) {
+        self.doSearch = function (data, event) {
             if (self.is_fetch)
                 return true;
-            self.search($('#' + id).val());
+            self.search($(event.target).val());
         };
-        self.clearSearch = function (id) {
-            $('#' + id).val('');
+        self.clearSearch = function (data, event) {
+            $(event.target).parent().children('input').val('');
             self.search('');
         };
         
@@ -385,11 +385,19 @@ ko.components.register('grid', {
 
         ko.computed(self.fetch);
 
-        $("#app-grid .wrap-scroll").css('height', $(window).height() - 135);
-        $(window).resize(function () {
+        if (params.height == undefined){
             $("#app-grid .wrap-scroll").css('height', $(window).height() - 135);
-            tableRefesh('#app-grid');
-        });
+            $(window).resize(function () {
+                $("#app-grid .wrap-scroll").css('height', $(window).height() - 135);
+                tableRefesh('#app-grid');
+            });
+        }else{
+            $("#app-grid .wrap-scroll").css('height', params.height);
+            $(window).resize(function () {
+                $("#app-grid .wrap-scroll").css('height', params.height);
+                tableRefesh('#app-grid');
+            });
+        }
     },
     template: '\
     <nav class="navbar navbar-default">\
@@ -431,8 +439,8 @@ ko.components.register('grid', {
                         </div>\
                     </div>\
                     <div id="search-wrap" style="float:right;">\
-                        <input type="text" class="form-control" id="search-warehouse" data-bind="attr: {placeholder: trans.search}, event: {keyup: doSearch.bind($data, \'search-warehouse\')} ">\
-                        <i id="search-clear" class="glyphicon glyphicon-remove" data-bind="click: clearSearch.bind($data, \'search-warehouse\'), attr: {\'data-toggle\': search()!=\'\'}"></i>\
+                        <input type="text" class="form-control" data-bind="attr: {placeholder: trans.search}, event: {keyup: doSearch} ">\
+                        <i id="search-clear" class="glyphicon glyphicon-remove" data-bind="click: clearSearch, attr: {\'data-toggle\': search()!=\'\'}"></i>\
                     </div>\
                 </div>\
             </div>\
@@ -650,3 +658,17 @@ ko.components.register('edit-form', {
             <div data-bind="template: {name: params.template, afterRender: form_rendered }"></div>\
         </form>'
 });
+
+ko.bindingHandlers.hotkeys = {
+    init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+        $.each(valueAccessor(), function(index, value){
+            $(element).on('keydown', null, value.key, function(){
+                value.action();
+                return false;
+            });
+        });
+    },
+    update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+        //
+    }
+};
