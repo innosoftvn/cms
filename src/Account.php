@@ -31,6 +31,12 @@ class Account extends Authenticatable {
         }
         return self::$info;
     }
+    
+    // check permission
+    // $params as array()
+    public static function has_permission($params){
+        return true;
+    }
 
     public function allowed_filemanager() {
         // check permission of current user here

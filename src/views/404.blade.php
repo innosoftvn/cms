@@ -10,7 +10,7 @@ body {
     padding-top: 100px;
     padding-bottom: 40px;
     background-color: #dbdddd;
-    background-image: url("{{ url('assets/cms/images/base-bg.png') }}");
+    background-image: url("{{ url('assets/images/base-bg.png') }}");
 }
 .panel-shadow {
     max-width: 330px;

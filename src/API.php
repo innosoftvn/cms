@@ -88,14 +88,26 @@ class API extends Controller
         $query->skip((\Request::get('pagenum', 1)-1)*\Request::get('pagesize', 10));
         $query->take(\Request::get('pagesize', 10));
         if(\Request::has('groupby')){
-            $groupby_query = clone $query;
-            $groupby_query = $groupby_query->select(\Request::get('groupby'), \DB::raw('count(*) as total'))->groupBy(\Request::get('groupby'));
-            $groups = $groupby_query->get();
-            foreach ($groups as $group){
-                $row_group = clone $query;
-                $group->rows = $row_group->where(\Request::get('groupby'), $group->{\Request::get('groupby')})->get();
+            $rows  = $query->get();
+            $groupby = \Request::get('groupby');
+            $row_group = [];
+            foreach ($rows as $row){
+                if(!isset($row_group[$row->$groupby])){
+                    $row_group[$row->$groupby] = [
+                        'rows' => []
+                    ];
+                }
+                array_push($row_group[$row->$groupby]['rows'], $row);
             }
-            $result['rows'] = $groups;
+            $row_result = [];
+            foreach($row_group as $key=>$group){
+                array_push($row_result, [
+                    $groupby =>  $key,
+                    'rows' => $group['rows'],
+                    'total' => count($group['rows'])
+                ]);
+            }
+            $result['rows'] = $row_result;
         }else{
             $result['rows']  = $query->get();
         }

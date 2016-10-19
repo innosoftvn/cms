@@ -217,7 +217,7 @@ textarea {
 @media (max-width: 48em) {
     .app-main .app-sidebar {
         margin-left: -200px;
-        z-index: 2;
+        z-index: 10;
     }
     .app-main .app-content {
         margin-left: 0px;
