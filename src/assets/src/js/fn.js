@@ -878,11 +878,13 @@ ko.components.register('edit-form', {
 
         self.back = function () {
             self.current({});
+			formReset('frm-edit');
             params.back();
         };
 
         self.reset = function () {
             self.current({});
+			formReset('frm-edit');
         };
 
         self.form_rendered = function () {

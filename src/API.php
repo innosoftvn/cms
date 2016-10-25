@@ -117,7 +117,8 @@ class API extends Controller
     public function postAdd(){
         $pre = $this->prepare_add();
         if($pre['status'] !== 'success') return $pre;
-        $validator = \Validator::make(\Request::all(), $this->M->rules, $this->validator_msg);
+        $validator = \Validator::make(\Request::all(), $this->M->rules);
+		$validator->setAttributeNames( $this->validator_msg ); 
         if ($validator->fails()) return ['status'=>'error', 'message'=> implode('<br>', $validator->errors()->all())];
         try {
             $model = $this->M->create(\Request::all());
