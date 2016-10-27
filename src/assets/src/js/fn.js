@@ -463,12 +463,12 @@ ko.components.register('grid', {
                         self.rows(data.rows);
                         self.total(data.total);
                         self.is_fetch = false;
-                        tableRefesh('#app-grid');
+                        tableRefesh('#'+self.uigrid+' #app-grid');
                     }
                 });
             }else{
                 self.localdata_handle();
-                tableRefesh('#app-grid');
+                tableRefesh('#'+self.uigrid+' #app-grid');
             }
         };
         self.add = function () {
@@ -641,25 +641,26 @@ ko.components.register('grid', {
             return self.localdata();
         };
         // end local data handle
-        
-        if (params.callback !== undefined)
-            params.callback(self);
 
         ko.computed(self.fetch);
 
-        if (params.height == undefined){
-            $("#app-grid .wrap-scroll").css('height', $(window).height() - 135);
-            $(window).resize(function () {
-                $("#app-grid .wrap-scroll").css('height', $(window).height() - 135);
-                tableRefesh('#app-grid');
-            });
-        }else{
-            $("#app-grid .wrap-scroll").css('height', params.height);
-            $(window).resize(function () {
-                $("#app-grid .wrap-scroll").css('height', params.height);
-                tableRefesh('#app-grid');
-            });
-        }
+        self.init = function(){
+            if (params.height == undefined){
+                $('#'+self.uigrid+" #app-grid .wrap-scroll").css('height', $(window).height() - 135);
+                $(window).resize(function () {
+                    $('#'+self.uigrid+" #app-grid .wrap-scroll").css('height', $(window).height() - 135);
+                    tableRefesh('#'+self.uigrid+' #app-grid');
+                });
+            }else{
+                $('#'+self.uigrid+" #app-grid .wrap-scroll").css('height', params.height);
+                $(window).resize(function () {
+                    $('#'+self.uigrid+" #app-grid .wrap-scroll").css('height', params.height);
+                    tableRefesh('#'+self.uigrid+' #app-grid');
+                });
+            }
+            if (params.callback !== undefined)
+                params.callback(self);
+        };
     },
     template: '\
     <div data-bind="attr:{id: uigrid, uigrid: uigrid}">\
@@ -845,7 +846,8 @@ ko.components.register('grid', {
             </div>\
         </div>\
         <!-- /ko -->\
-    </div>'
+    </div>\
+    <span data-bind="template: { afterRender: init }"></span>'
 });
 
 ko.components.register('edit-form', {
