@@ -126,7 +126,7 @@ class API extends Controller
             return ['status'=>'error', 'message'=>trans('cms::cms.create_error_msg'), 'info'=>$e->getMessage()];
         }
         $this->callback_add($model);
-        return ['status'=>'success', 'message'=>trans('cms::cms.create_success_msg')];
+        return ['status'=>'success', 'message'=>trans('cms::cms.create_success_msg'), 'data'=>$model];
     }
     
     public function postUpdate(){

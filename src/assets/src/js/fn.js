@@ -326,6 +326,9 @@ ko.components.register('grid', {
         if(params.cellsrenderer === undefined){
             params.cellsrenderer = {};
         }
+        if(params.cellstemplaterenderer === undefined){
+            params.cellstemplaterenderer = {};
+        }
         self.buttons = (params.buttons === undefined ? [] : params.buttons);
         self.cols = $.map(params.cols, function (val, key) {
             return key;
@@ -759,11 +762,14 @@ ko.components.register('grid', {
                                     </td>\
                                    <!--ko foreach: $parent.cols-->\
                                    <td>\
-                                        <!-- ko if: $parents[1].params.cellsrenderer[$data] === undefined -->\
+                                        <!-- ko if: $parents[1].params.cellsrenderer[$data] === undefined && $parents[1].params.cellstemplaterenderer[$data] === undefined -->\
                                         <span data-bind="html: row[$data]"></span>\
                                         <!-- /ko -->\
                                         <!-- ko if: $parents[1].params.cellsrenderer[$data] !== undefined -->\
                                         <span data-bind="html: $parents[1].params.cellsrenderer[$data](row)"></span>\
+                                        <!-- /ko -->\
+                                        <!-- ko if: $parents[1].params.cellstemplaterenderer[$data] !== undefined -->\
+                                        <div data-bind="template: {name: $parents[1].params.cellstemplaterenderer[$data], data: row}"></div>\
                                         <!-- /ko -->\
                                    </td>\
                                    <!--/ko-->\
@@ -801,11 +807,14 @@ ko.components.register('grid', {
                                            <!--ko foreach: $parents[1].cols-->\
                                                 <!--ko if: $parents[2].cols[$index()] !== $parents[2].groupby() -->\
                                                     <td>\
-                                                        <!-- ko if: $parents[2].params.cellsrenderer[$data] === undefined -->\
+                                                        <!-- ko if: $parents[2].params.cellsrenderer[$data] === undefined && $parents[2].params.cellstemplaterenderer[$data] === undefined -->\
                                                         <span data-bind="html: row_group[$data]"></span>\
                                                         <!-- /ko -->\
                                                         <!-- ko if: $parents[2].params.cellsrenderer[$data] !== undefined -->\
                                                         <span data-bind="html: $parents[2].params.cellsrenderer[$data](row_group)"></span>\
+                                                        <!-- /ko -->\
+                                                        <!-- ko if: $parents[2].params.cellstemplaterenderer[$data] !== undefined -->\
+                                                        <div data-bind="template: {name: $parents[2].params.cellstemplaterenderer[$data], data: row_group}"></div>\
                                                         <!-- /ko -->\
                                                     </td>\
                                                 <!--/ko-->\
@@ -854,12 +863,20 @@ ko.components.register('edit-form', {
     viewModel: function (params) {
         var self = this;
         self.params = params;
-        if (params.buttons === undefined)
-            self.params.buttons = [];
+        self.frmToolbar = {
+            btnBack: true,
+            btnCancel: true,
+            btnSaveAndBack: true,
+            btnSaveAndNew: true
+        };
+        if (params.toolbar != undefined)
+            self.frmToolbar = $.extend(self.frmToolbar, params.toolbar);
+        
+        self.frmToolbar = ko.mapping.fromJS(self.frmToolbar);
         self.current = ko.observable({});
         self.method = ko.observable('add');
 
-        self.save = function () {
+        self.save = function (callback) {
             if (!$('#frm-edit').valid())
                 return false;
             if (params.prepare_save !== undefined)
@@ -870,23 +887,36 @@ ko.components.register('edit-form', {
                 success: function (data) {
                     toastr[data.status](data.message);
                     if (data.status == 'success') {
-                        self.back();
+                        if(callback !== undefined)
+                            callback();
                         if (self.params.saved !== undefined)
                             self.params.saved();
                     }
                 }
             });
         };
+        
+        self.saveAndNew = function(){
+            self.save(function(){
+                self.reset();
+                self.method('add');
+            });
+        };
+        
+        self.saveAndBack = function(){
+            self.save(function(){
+                self.back();
+            });
+        };
 
         self.back = function () {
-            self.current({});
-			formReset('frm-edit');
+            self.reset();
             params.back();
         };
 
         self.reset = function () {
             self.current({});
-			formReset('frm-edit');
+            formReset('frm-edit');
         };
 
         self.form_rendered = function () {
@@ -906,21 +936,28 @@ ko.components.register('edit-form', {
         <nav class="navbar navbar-default">\
             <div class="container-fluid">\
                 <div class="app-toolbar">\
+                    <!-- ko if: frmToolbar.btnBack()==true -->\
                     <div class="pull-left">\
                         <button data-bind="click: back" type="button" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Quay lại</button>\
                     </div>\
+                    <!-- /ko -->\
                     <!-- ko if: params.leftToolbar !== undefined -->\
                         <div class="pull-left" data-bind="template: {name: params.leftToolbar }"></div>\
                     <!-- /ko -->\
                     <!-- ko if: params.rightToolbar !== undefined -->\
                         <div class="pull-right" data-bind="template: {name: params.rightToolbar }"></div>\
                     <!-- /ko -->\
-                    <!-- ko if: method()===\'add\' && params.buttons.indexOf(\'add\') >= 0 || method()===\'update\' && params.buttons.indexOf(\'edit\') >= 0-->\
                     <div class="pull-right">\
+                        <!-- ko if: frmToolbar.btnCancel()==true -->\
                         <button data-bind="click: reset" type="button" class="btn btn-default"><span class="glyphicon glyphicon-refresh"></span> Huỷ</button>\
-                        <button data-bind="click: save" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Lưu</button>\
+                        <!-- /ko -->\
+                        <!-- ko if: frmToolbar.btnSaveAndBack()==true -->\
+                        <button data-bind="click: saveAndBack" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> <span data-bind="html: method()==\'add\' ? \'Lưu\':\'Cập nhật\'"></span> & Thoát</button>\
+                        <!-- /ko -->\
+                        <!-- ko if: frmToolbar.btnSaveAndNew()==true -->\
+                        <button data-bind="click: saveAndNew" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> <span data-bind="html: method()==\'add\' ? \'Lưu\':\'Cập nhật\'"></span> & Thêm mới</button>\
+                        <!-- /ko -->\
                     </div>\
-                    <!-- /ko -->\
                 </div>\
             </div>\
         </nav>\
