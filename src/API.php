@@ -43,13 +43,21 @@ class API extends Controller
     public function postIndex() {
         $query = $this->prepare_index();
         if (\Request::has('search')){
-            if(isset($query->columns) && $query->columns != null){
+            if(isset($this->search_on_columns)){
+                $query->where(function($query)
+                {
+                    $search = \Request::get('search');
+                    foreach ($this->search_on_columns as $col){
+                        $query->orWhere($col, 'like', '%'.($search).'%');
+                    }
+                });
+            }else if(isset($query->columns) && $query->columns != null){
                 $cols = $query->columns;
                 $query->where(function($query) use ($cols)
                 {
                     $search = \Request::get('search');
                     foreach ($cols as $col){
-                        $query->orWhere($col, 'like', '%'.str_slug($search, ' ').'%');
+                        $query->orWhere($col, 'like', '%'.($search).'%');
                     }
                 });
             }else{
@@ -63,7 +71,7 @@ class API extends Controller
                 {
                     $search = \Request::get('search');
                     foreach ($cols as $col){
-                        $query->orWhere($col, 'like', '%'.str_slug($search, ' ').'%');
+                        $query->orWhere($col, 'like', '%'.($search).'%');
                     }
                 });
             }
