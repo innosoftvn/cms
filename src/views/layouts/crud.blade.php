@@ -7,6 +7,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ trans('app.'.uri()) }}</title>
 
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
         <link rel="stylesheet" href="{{ url('assets/css/app.css') }}">
         <script src="{{ url('assets/js/app.js') }}"></script>
 
@@ -16,6 +18,14 @@
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
         <![endif]-->
+        <script type="text/javascript">
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+        </script>
+        
         @yield('assets')
     </head>
     <body>
