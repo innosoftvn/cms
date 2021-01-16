@@ -42,11 +42,11 @@ class API extends Controller
     
     public function postIndex() {
         $query = $this->prepare_index();
-        if (\Request::has('search')){
+        if (request()->search){
             if(isset($this->search_on_columns)){
                 $query->where(function($query)
                 {
-                    $search = \Request::get('search');
+                    $search = request()->get('search');
                     foreach ($this->search_on_columns as $col){
                         $query->orWhere($col, 'like', '%'.($search).'%');
                     }
@@ -55,7 +55,7 @@ class API extends Controller
                 $cols = $query->columns;
                 $query->where(function($query) use ($cols)
                 {
-                    $search = \Request::get('search');
+                    $search = request()->get('search');
                     foreach ($cols as $col){
                         $query->orWhere($col, 'like', '%'.($search).'%');
                     }
@@ -69,15 +69,15 @@ class API extends Controller
                 $cols = array_keys((array) $cols);
                 $query->where(function($query) use ($cols)
                 {
-                    $search = \Request::get('search');
+                    $search = request()->get('search');
                     foreach ($cols as $col){
                         $query->orWhere($col, 'like', '%'.($search).'%');
                     }
                 });
             }
         }
-        if(\Request::has('filters')){
-            $filters = \Request::get('filters');
+        if(request()->filters){
+            $filters = request()->get('filters');
             foreach ($filters as $filter){
                 if(isset($filter['operator'])){
                     if(is_array($filter['operator'])){
@@ -89,15 +89,15 @@ class API extends Controller
                 }else $query->whereIn($filter['key'], $filter['value']);
             }
         }
-        if(\Request::has('sort')){
-            $query->orderBy(\Request::get('sort'), \Request::get('order')==1 ? 'asc':'desc');
+        if(request()->sort){
+            $query->orderBy(request()->get('sort'), request()->get('order')==1 ? 'asc':'desc');
         }
         $result['total'] = $query->count();
-        $query->skip((\Request::get('pagenum', 1)-1)*\Request::get('pagesize', 10));
-        $query->take(\Request::get('pagesize', 10));
-        if(\Request::has('groupby')){
+        $query->skip((request()->get('pagenum', 1)-1)*request()->get('pagesize', 10));
+        $query->take(request()->get('pagesize', 10));
+        if(request()->groupby){
             $rows  = $query->get();
-            $groupby = \Request::get('groupby');
+            $groupby = request()->get('groupby');
             $row_group = [];
             foreach ($rows as $row){
                 if(!isset($row_group[$row->$groupby])){
@@ -125,11 +125,11 @@ class API extends Controller
     public function postAdd(){
         $pre = $this->prepare_add();
         if($pre['status'] !== 'success') return $pre;
-        $validator = \Validator::make(\Request::all(), $this->M->rules);
+        $validator = \Validator::make(request()->all(), $this->M->rules);
 		$validator->setAttributeNames( $this->validator_msg ); 
         if ($validator->fails()) return ['status'=>'error', 'message'=> implode('<br>', $validator->errors()->all())];
         try {
-            $model = $this->M->create(\Request::all());
+            $model = $this->M->create(request()->all());
         } catch (\Exception $e) {
             return ['status'=>'error', 'message'=>trans('cms::cms.create_error_msg'), 'info'=>$e->getMessage()];
         }
@@ -141,11 +141,11 @@ class API extends Controller
         try {
             $pre = $this->prepare_update();
             if($pre['status'] !== 'success') return $pre;
-            $r = $this->M->findOrFail(\Request::get('id'));
-            $validator = \Validator::make(\Request::all(), $this->M->rules);
+            $r = $this->M->findOrFail(request()->get('id'));
+            $validator = \Validator::make(request()->all(), $this->M->rules);
             $validator->setAttributeNames( $this->validator_msg ); 
             if ($validator->fails()) return ['status'=>'error', 'message'=> implode('<br>', $validator->errors()->all())];
-            $r->update(\Request::all());
+            $r->update(request()->all());
         } catch(\Exception $e) {
             return ['status'=>'error', 'message'=>trans('cms::cms.update_error_msg'), 'info'=>$e->getMessage()];
         }
@@ -154,7 +154,7 @@ class API extends Controller
     
     public function postDelete(){
         try {
-            $ids = json_decode(\Request::get('ids'));
+            $ids = json_decode(request()->get('ids'));
             $pre = $this->prepare_delete($ids);
             if($pre['status'] !== 'success') return $pre;
             $this->M->destroy( $ids );
