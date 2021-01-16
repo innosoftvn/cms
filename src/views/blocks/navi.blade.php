@@ -16,6 +16,6 @@
         @endforeach
     @endforeach
     <li>
-        <a onclick="open_popup('{{ url('admin/filemanager?_token='.csrf_token() ) }}')"><span class="glyphicon glyphicon-picture"></span> <span class="item-label">Quản lý tập tin</span></a>
+        <a onclick="open_popup('{{ url('admin/filemanager?secret='.bcrypt(env('APP_KEY')) ) }}')"><span class="glyphicon glyphicon-picture"></span> <span class="item-label">Quản lý tập tin</span></a>
     </li>
 </ul>

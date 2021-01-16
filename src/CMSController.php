@@ -4,6 +4,7 @@ namespace InnoSoft\CMS;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class CMSController extends Controller
 {   
@@ -12,7 +13,7 @@ class CMSController extends Controller
         // authentication
         if($paths === '') return redirect (config('cms.backend_prefix') . '/login');
         if(in_array($paths, ['login', 'logout'])){
-            return \App::make('\InnoSoft\CMS\AdminAuthController')->{$method.studly_case($paths)}();
+            return \App::make('\InnoSoft\CMS\AdminAuthController')->{$method.Str::studly($paths)}();
         }
         if(!(\Auth::check() && \Auth::user()->login_backend)) abort(404);
         
@@ -27,7 +28,7 @@ class CMSController extends Controller
                     if(count($paths) === 1){
                         return \App::make($controller)->{$method.'Index'}();
                     }
-                    return \App::make($controller)->{$method.studly_case($paths[1])}();
+                    return \App::make($controller)->{$method.Str::studly($paths[1])}();
                 }
             }
         }
