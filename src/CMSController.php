@@ -3,6 +3,7 @@
 namespace InnoSoft\CMS;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Arr;
 
 class CMSController extends Controller
 {   
@@ -19,8 +20,8 @@ class CMSController extends Controller
         $paths = explode("/", $paths);
         $routes = config('block.navi');
         foreach ($routes as $route) {
-            if(array_has($route, $paths[0].'.ctrl')){
-                $controller = array_get($route, $paths[0].'.ctrl');
+            if (Arr::has($route, $paths[0].'.ctrl')) {
+                $controller = Arr::get($route, $paths[0].'.ctrl');
                 // check has permission
                 if( \App::make(config('auth.providers.users.model'))->has_permission(['route'=>$paths[0], 'controller'=>$controller]) ){
                     if(count($paths) === 1){

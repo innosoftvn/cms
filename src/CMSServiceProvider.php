@@ -2,6 +2,7 @@
 
 namespace InnoSoft\CMS;
 
+use File;
 use Illuminate\Support\ServiceProvider;
 
 class CMSServiceProvider extends ServiceProvider
@@ -53,6 +54,19 @@ class CMSServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        
+        $this->autoloadHelpers(__DIR__.'/helpers');
+    }
+
+    /**
+     * Load module's helpers
+     * @param $directory
+     * @since 2.0
+     */
+    public function autoloadHelpers($directory)
+    {
+        $helpers = File::glob($directory . '/*.php');
+        foreach ($helpers as $helper) {
+            File::requireOnce($helper);
+        }
     }
 }
